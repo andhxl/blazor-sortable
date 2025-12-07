@@ -617,15 +617,18 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     {
         var item = Items![oldIndex];
 
-        Items.RemoveAt(oldIndex);
-        newIndex = InsertOrAddItem(newIndex, item); // Sometimes SortableJS provides newIndex one greater than the last valid index
-        StateHasChanged();
+        // Sometimes SortableJS provides newIndex one greater than the last valid index
+        if (Items.Count == 1 && newIndex == 1)
+            newIndex = 0;
 
-        if (OnUpdate is not null)
-        {
-            var args = new SortableEventArgs<TItem>(item, this, oldIndex, this, newIndex);
-            OnUpdate(args);
-        }
+        var args = new SortableEventArgs<TItem>(item, this, oldIndex, this, newIndex);
+        OnUpdate?.Invoke(args);
+        if (args.Cancel)
+            return;
+
+        Items.RemoveAt(oldIndex);
+        Items.Insert(newIndex, item);
+        StateHasChanged();
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
@@ -648,18 +651,17 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         if (item is null)
             return;
 
+        var args = new SortableEventArgs<TItem>(item, from, oldIndex, this, newIndex, isClone);
+        OnAdd?.Invoke(args);
+        if (args.Cancel)
+            return;
+
         from.SuppressNextRemove = false;
 
         if (Items is not null)
         {
             Items.Insert(newIndex, item);
             StateHasChanged();
-        }
-
-        if (OnAdd is not null)
-        {
-            var args = new SortableEventArgs<TItem>(item, from, oldIndex, this, newIndex, isClone);
-            OnAdd(args);
         }
     }
 
@@ -673,16 +675,15 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         }
 
         var item = Items![oldIndex];
+        var to = SortableRegistry[toId]!;
+
+        var args = new SortableEventArgs<TItem>(item, this, oldIndex, to, newIndex);
+        OnRemove?.Invoke(args);
+        if (args.Cancel)
+            return;
 
         Items.RemoveAt(oldIndex);
         StateHasChanged();
-
-        if (OnRemove is not null)
-        {
-            var to = SortableRegistry[toId]!;
-            var args = new SortableEventArgs<TItem>(item, this, oldIndex, to, newIndex);
-            OnRemove(args);
-        }
     }
 
     //[JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
@@ -714,17 +715,5 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     {
         get => suppressNextRemove;
         set => suppressNextRemove = value;
-    }
-
-    private int InsertOrAddItem(int index, TItem item)
-    {
-        if (index >= Items!.Count)
-        {
-            Items.Add(item);
-            return Items.Count - 1;
-        }
-
-        Items.Insert(index, item);
-        return index;
     }
 }
