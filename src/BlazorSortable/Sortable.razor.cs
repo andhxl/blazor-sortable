@@ -96,11 +96,27 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// </summary>
     /// <remarks>
     /// Used only when <see cref="Pull"/> is set to <see cref="SortablePullMode.Function"/>.
-    /// The function receives the item being dragged and the target list info.
-    /// Return <c>true</c> to allow pulling, <c>false</c> to deny.
+    /// This feature does <b>not</b> work when the application is running in anything
+    /// other than <b>Blazor WebAssembly</b>.
+    /// Sortable.js requires a synchronous JS-to-.NET call, which is not supported
+    /// outside of WebAssembly (for example, in Blazor Server or Blazor Hybrid).
     /// </remarks>
+    /// <exception cref="NotSupportedException">
+    /// Thrown when used in a non-WebAssembly environment.
+    /// </exception>
     [Parameter]
-    public Predicate<SortableTransferContext<TItem>>? PullFunction { get; set; }
+#pragma warning disable BL0007 // Component parameters should be auto properties
+    public Predicate<SortableTransferContext<TItem>>? PullFunction
+#pragma warning restore BL0007 // Component parameters should be auto properties
+    {
+        get => pullFunction;
+        set
+        {
+            if (!OperatingSystem.IsBrowser())
+                throw new NotSupportedException("PullFunction is only supported in Blazor WebAssembly");
+            pullFunction = value;
+        }
+    }
 
     /// <summary>
     /// Mode for adding items to this Sortable component.
@@ -122,11 +138,27 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// </summary>
     /// <remarks>
     /// Used only when <see cref="Put"/> is set to <see cref="SortablePutMode.Function"/>.
-    /// The function receives the item being dragged and the target list info as parameters.
-    /// Should return <c>true</c> if the item can be added, <c>false</c> otherwise.
+    /// This feature does <b>not</b> work when the application is running in anything
+    /// other than <b>Blazor WebAssembly</b>.
+    /// Sortable.js requires a synchronous JS-to-.NET call, which is not supported
+    /// outside of WebAssembly (for example, in Blazor Server or Blazor Hybrid).
     /// </remarks>
+    /// <exception cref="NotSupportedException">
+    /// Thrown when used in a non-WebAssembly environment.
+    /// </exception>
     [Parameter]
-    public Predicate<SortableTransferContext<object>>? PutFunction { get; set; }
+#pragma warning disable BL0007 // Component parameters should be auto properties
+    public Predicate<SortableTransferContext<object>>? PutFunction
+#pragma warning restore BL0007 // Component parameters should be auto properties
+    {
+        get => putFunction;
+        set
+        {
+            if (!OperatingSystem.IsBrowser())
+                throw new NotSupportedException("PutFunction is only supported in Blazor WebAssembly");
+            putFunction = value;
+        }
+    }
 
     /// <summary>
     /// Dictionary of converters for transforming items from other SortableLists.
@@ -382,6 +414,9 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
     [Inject] private ISortableRegistry SortableRegistry { get; set; } = default!;
     [Inject] private IJSRuntime Js { get; set; } = default!;
+
+    private Predicate<SortableTransferContext<TItem>>? pullFunction;
+    private Predicate<SortableTransferContext<object>>? putFunction;
 
     private IJSObjectReference? jsModule;
     private DotNetObjectReference<Sortable<TItem>>? selfReference;

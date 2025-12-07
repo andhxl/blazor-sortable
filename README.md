@@ -135,10 +135,10 @@ builder.Services.AddSortable();
 | `Pull` | `SortablePullMode?` | `null` | Mode for pulling items from the list |
 | `PullGroups` | `string[]?` | `null` | **Required when `Pull="SortablePullMode.Groups"`.** Specifies the groups into which items from this list can be dragged |
 | `CloneFunction` | `Func<TItem, TItem>?` | `null` | **Required when `Pull="SortablePullMode.Clone"`.** A factory method used to create a clone of the dragged item |
-| `PullFunction` | `Predicate<SortableTransferContext<TItem>>?` | `null` | **Required when `Pull="SortablePullMode.Function"`.** Function to determine if an item can be pulled to the target Sortable component |
+| `PullFunction` | `Predicate<SortableTransferContext<TItem>>?` | `null` | **Required when `Pull="SortablePullMode.Function"`.** Function to determine if an item can be pulled to the target Sortable component. **Works only in Blazor WebAssembly** |
 | `Put` | `SortablePutMode?` | `null` | Mode for adding items to the list |
 | `PutGroups` | `string[]?` | `null` | **Required when `Put="SortablePutMode.Groups"`.** Specifies the groups from which items are allowed to be added |
-| `PutFunction` | `Predicate<SortableTransferContext<object>>?` | `null` | **Required when `Put="SortablePutMode.Function"`.** Function to determine if an item can be put into this list |
+| `PutFunction` | `Predicate<SortableTransferContext<object>>?` | `null` | **Required when `Put="SortablePutMode.Function"`.** Function to determine if an item can be put into this list. **Works only in Blazor WebAssembly** |
 | `ConvertFunction` | `Func<SortableTransferContext<object>, TItem?>?` | `null` | Function to convert items from other Sortable component to the target type |
 | `Sort` | `bool` | `true` | Enables or disables sorting of items within the list |
 | `Delay` | `int` | `0` | Time in milliseconds to define when the sorting should start. Unfortunately, due to browser restrictions, delaying is not possible on IE or Edge with native drag and drop |
@@ -242,3 +242,8 @@ The `ISortableInfo` interface provides information about a sortable component.
   ```razor
   FallbackOnBody="true"
   ```
+
+- **Blazor Server limitation:**  
+  `PullFunction` and `PutFunction` require synchronous JS-to-.NET calls used by Sortable.js,
+  which are only available in **Blazor WebAssembly**.
+  On Blazor Server these functions cannot work and will throw `NotSupportedException`.

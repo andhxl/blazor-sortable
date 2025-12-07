@@ -10,7 +10,7 @@ internal class SortableRegistry : ISortableRegistry
     {
         if (!_sortables.TryAdd(id, sortable))
         {
-            throw new InvalidOperationException($"A Sortable with ID '{id}' is already registered.");
+            throw new InvalidOperationException($"A Sortable with ID '{id}' is already registered");
         }
     }
 
