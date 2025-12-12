@@ -15,7 +15,10 @@ public static class SortableExtensions
     /// <returns>The <see cref="IServiceCollection"/> for chaining.</returns>
     public static IServiceCollection AddSortable(this IServiceCollection services)
     {
+        ArgumentNullException.ThrowIfNull(services);
+
         services.AddScoped<ISortableRegistry, SortableRegistry>();
+
         return services;
     }
 }
