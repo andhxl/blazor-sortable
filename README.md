@@ -58,7 +58,7 @@ Add to your .csproj file:
 ```
 > You can also specify the version manually to prevent browser caching:
 > ```html
-> <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css?v=5.2.0" />
+> <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css?v=5.2.1" />
 > ```
 > Or automatically insert the current assembly version (works in `.razor` or `.cshtml` files).
 > Add this code within the `<head>` element, or for **Blazor WebAssembly**, place it inside the `<HeadContent>` section of `App.razor`:
