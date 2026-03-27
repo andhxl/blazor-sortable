@@ -11,7 +11,7 @@ namespace BlazorSortable;
 /// Component for creating sortable with drag and drop functionality.
 /// </summary>
 /// <typeparam name="TItem">Type of items in the list.</typeparam>
-public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
+public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 {
     /// <summary>
     /// List of items to display and sort.
@@ -105,18 +105,7 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Thrown when used in a non-WebAssembly environment.
     /// </exception>
     [Parameter]
-#pragma warning disable BL0007 // Component parameters should be auto properties
-    public Predicate<SortableTransferContext<TItem>>? PullFunction
-#pragma warning restore BL0007 // Component parameters should be auto properties
-    {
-        get => pullFunction;
-        set
-        {
-            if (!OperatingSystem.IsBrowser())
-                throw new NotSupportedException("PullFunction is only supported in Blazor WebAssembly");
-            pullFunction = value;
-        }
-    }
+    public Predicate<SortableTransferContext<TItem>>? PullFunction { get; set; }
 
     /// <summary>
     /// Mode for adding items to this Sortable component.
@@ -147,18 +136,7 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Thrown when used in a non-WebAssembly environment.
     /// </exception>
     [Parameter]
-#pragma warning disable BL0007 // Component parameters should be auto properties
-    public Predicate<SortableTransferContext<object>>? PutFunction
-#pragma warning restore BL0007 // Component parameters should be auto properties
-    {
-        get => putFunction;
-        set
-        {
-            if (!OperatingSystem.IsBrowser())
-                throw new NotSupportedException("PutFunction is only supported in Blazor WebAssembly");
-            putFunction = value;
-        }
-    }
+    public Predicate<SortableTransferContext<object>>? PutFunction { get; set; }
 
     /// <summary>
     /// Dictionary of converters for transforming items from other SortableLists.
@@ -415,9 +393,6 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     [Inject] private ISortableRegistry SortableRegistry { get; set; } = default!;
     [Inject] private IJSRuntime Js { get; set; } = default!;
 
-    private Predicate<SortableTransferContext<TItem>>? pullFunction;
-    private Predicate<SortableTransferContext<object>>? putFunction;
-
     private IJSObjectReference? jsModule;
     private DotNetObjectReference<Sortable<TItem>>? selfReference;
 
@@ -425,7 +400,7 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     private bool suppressNextRemove;
 
     /// <inheritdoc/>
-    protected override sealed void OnInitialized()
+    protected override void OnParametersSet()
     {
         switch (Pull)
         {
@@ -437,6 +412,8 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 break;
             case SortablePullMode.Function:
                 ArgumentNullException.ThrowIfNull(PullFunction);
+                if (!OperatingSystem.IsBrowser())
+                    throw new NotSupportedException("PullFunction is only supported in Blazor WebAssembly.");
                 break;
         }
 
@@ -447,22 +424,23 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 break;
             case SortablePutMode.Function:
                 ArgumentNullException.ThrowIfNull(PutFunction);
+                if (!OperatingSystem.IsBrowser())
+                    throw new NotSupportedException("PutFunction is only supported in Blazor WebAssembly.");
                 break;
         }
     }
 
     /// <inheritdoc/>
-    protected override sealed async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            jsModule = await Js.InvokeAsync<IJSObjectReference>("import",
-                $"./_content/BlazorSortable/js/blazor-sortable.js{SortableAssemblyInfo.VersionQuery}");
-            selfReference = DotNetObjectReference.Create(this);
-            await jsModule.InvokeVoidAsync("initSortable", Id, BuildOptions(), selfReference);
+        if (!firstRender) return;
 
-            SortableRegistry.Register(Id, this);
-        }
+        jsModule = await Js.InvokeAsync<IJSObjectReference>("import",
+            $"./_content/BlazorSortable/js/blazor-sortable.js{SortableAssemblyMetadata.VersionQuery}");
+        selfReference = DotNetObjectReference.Create(this);
+        await jsModule.InvokeVoidAsync("initSortable", Id, BuildOptions(), selfReference);
+
+        SortableRegistry.Register(Id, this);
     }
 
     /// <inheritdoc/>
@@ -583,22 +561,16 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnStartJs(int index)
-    {
-        draggedItemIndex = index;
-    }
+    public void OnStartJs(int index) => draggedItemIndex = index;
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnEndJs()
-    {
-        draggedItemIndex = -1;
-    }
+    public void OnEndJs() => draggedItemIndex = -1;
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
     public bool OnPullJs(string toId)
     {
         var item = Items![draggedItemIndex];
-        var to = SortableRegistry[toId]!;
+        var to = SortableRegistry[toId];
         var ctx = new SortableTransferContext<TItem>(item, this, to);
         return PullFunction!(ctx);
     }
@@ -606,7 +578,7 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
     public bool OnPutJs(string fromId)
     {
-        var from = SortableRegistry[fromId]!;
+        var from = SortableRegistry[fromId];
         var item = from[from.DraggedItemIndex];
         var ctx = new SortableTransferContext<object>(item, from, this);
         return PutFunction!(ctx);
@@ -621,20 +593,21 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         if (Items.Count == 1 && newIndex == 1)
             newIndex = 0;
 
-        var args = new SortableEventArgs<TItem>(item, this, oldIndex, this, newIndex);
-        OnUpdate?.Invoke(args);
-        if (args.Cancel)
-            return;
-
         Items.RemoveAt(oldIndex);
         Items.Insert(newIndex, item);
         StateHasChanged();
+
+        if (OnUpdate is not null)
+        {
+            var args = new SortableEventArgs<TItem>(item, this, oldIndex, this, newIndex);
+            OnUpdate(args);
+        }
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
     public void OnAddJs(string fromId, int oldIndex, int newIndex, bool isClone)
     {
-        var from = SortableRegistry[fromId]!;
+        var from = SortableRegistry[fromId];
         from.SuppressNextRemove = !isClone;
 
         var sourceObject = from[oldIndex];
@@ -651,17 +624,19 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         if (item is null)
             return;
 
-        var args = new SortableEventArgs<TItem>(item, from, oldIndex, this, newIndex, isClone);
-        OnAdd?.Invoke(args);
-        if (args.Cancel)
-            return;
-
-        from.SuppressNextRemove = false;
-
+        // Dropzone mode: when Items is null, we still accept the drop event but do not store the item locally
         if (Items is not null)
         {
             Items.Insert(newIndex, item);
             StateHasChanged();
+        }
+
+        from.SuppressNextRemove = false;
+
+        if (OnAdd is not null)
+        {
+            var args = new SortableEventArgs<TItem>(item, from, oldIndex, this, newIndex, isClone);
+            OnAdd(args);
         }
     }
 
@@ -674,29 +649,25 @@ public partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             return;
         }
 
+        // Capture the removed item before mutating the collection
         var item = Items![oldIndex];
-        var to = SortableRegistry[toId]!;
-
-        var args = new SortableEventArgs<TItem>(item, this, oldIndex, to, newIndex);
-        OnRemove?.Invoke(args);
-        if (args.Cancel)
-            return;
 
         Items.RemoveAt(oldIndex);
         StateHasChanged();
+
+        if (OnRemove is not null)
+        {
+            var to = SortableRegistry[toId];
+            var args = new SortableEventArgs<TItem>(item, this, oldIndex, to, newIndex);
+            OnRemove(args);
+        }
     }
 
     //[JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    //public void OnSelectJs(int index)
-    //{
-    //    OnSelect?.Invoke(Items![index]);
-    //}
+    //public void OnSelectJs(int index) => OnSelect?.Invoke(Items![index]);
 
     //[JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    //public void OnDeselectJs(int index)
-    //{
-    //    OnDeselect?.Invoke(Items![index]);
-    //}
+    //public void OnDeselectJs(int index) => OnDeselect?.Invoke(Items![index]);
 
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 

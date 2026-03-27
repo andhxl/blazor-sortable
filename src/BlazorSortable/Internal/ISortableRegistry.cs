@@ -6,5 +6,5 @@ internal interface ISortableRegistry
 
     void Unregister(string id);
 
-    ISortableList? this[string id] { get; }
+    ISortableList this[string id] { get; }
 }

@@ -20,7 +20,7 @@ dotnet add package BlazorSortable
 Add to your .csproj file:
 ```xml
 <ItemGroup>
-  <PackageReference Include="BlazorSortable" Version="5.*" />
+  <PackageReference Include="BlazorSortable" Version="6.*" />
 </ItemGroup>
 ```
 
@@ -44,7 +44,7 @@ Add to your .csproj file:
     ```
     > You can optionally include a version parameter to avoid browser caching:
     > ```html
-    > <script src="lib/sortable/dist/js/Sortable.min.js?v=1.15.6"></script>
+    > <script src="lib/sortable/dist/js/Sortable.min.js?v=1.15.7"></script>
     > ```
 
     For local installation:
@@ -58,7 +58,7 @@ Add to your .csproj file:
 ```
 > You can also specify the version manually to prevent browser caching:
 > ```html
-> <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css?v=5.2.1" />
+> <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css?v=6.0.0" />
 > ```
 > Or automatically insert the current assembly version (works in `.razor` or `.cshtml` files).
 > Add this code within the `<head>` element, or for **Blazor WebAssembly**, place it inside the `<HeadContent>` section of `App.razor`:
@@ -201,7 +201,6 @@ The `SortableEventArgs<TItem>` class provides information about sorting operatio
 | `To` | `ISortableInfo` | Target sortable component |
 | `NewIndex` | `int` | The new index of the item in the target sortable |
 | `IsClone` | `bool` | Flag indicating whether the item is a clone |
-| `Cancel` | `bool` | Gets or sets a value indicating whether the current operation should be cancelled |
 
 ### SortableTransferContext
 
@@ -227,9 +226,6 @@ The `ISortableInfo` interface provides information about a sortable component.
 - **Order of events when dragging between lists:**
   1. `OnAdd` is triggered **first** — during this event, the item is **still present in the source list**.
   2. `OnRemove` is triggered **after**.
-
-- **Cancelling operations:**  
-  Inside `OnUpdate`, `OnAdd` and `OnRemove` handlers you can cancel the operation by setting `args.Cancel = true`.
 
 - **Events use `Action<T>?` instead of `EventCallback<T>`.**  
   **Reason:** `EventCallback.InvokeAsync` automatically triggers `ComponentBase.StateHasChanged` in the parent component, which causes conflicts between the DOM and the data model for this component.
