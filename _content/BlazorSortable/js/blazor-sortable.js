@@ -2,12 +2,12 @@ export function initSortable(id, options, component) {
     const el = document.getElementById(id);
     if (!el) return;
 
-    if (options.group.pull === "function") {
+    if (options.group.pull === 'function') {
         options.group.pull = function (to, from, dragEl, evt) {
             return component.invokeMethod('OnPullJs', to.el.id);
         };
     }
-    if (options.group.put === "function") {
+    if (options.group.put === 'function') {
         options.group.put = function (to, from, dragEl, evt) {
             return component.invokeMethod('OnPutJs', from.el.id);
         };
