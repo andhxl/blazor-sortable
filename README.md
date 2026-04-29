@@ -9,7 +9,7 @@ A Blazor component that wraps the [SortableJS](https://github.com/SortableJS/Sor
 
 ## Installation
 
-### Via Nuget Package Manager
+### Via NuGet Package Manager
 
 ### Via .NET CLI
 ```bash
@@ -26,12 +26,11 @@ Add to your .csproj file:
 
 ## Setup
 
-1. Add the SortableJS library to:
-    - `wwwroot/index.html` (for Blazor WebAssembly)  
-    - `Components/App.razor` (for Blazor Web App)  
-    - `Pages/_Host.cshtml` (for Blazor Server)
+1. Add the SortableJS script to the host page of your app, before the closing `</body>` tag:
+    - `wwwroot/index.html` (for Blazor WebAssembly Standalone App)  
+    - `Components/App.razor` (for Blazor Web App)
 
-    Using one of the following methods:
+    Use one of the following methods:
 
     a) **Via CDN:**
     ```html
@@ -40,78 +39,75 @@ Add to your .csproj file:
 
     b) **Locally:**
     ```html
-    <script src="lib/sortable/dist/js/Sortable.min.js"></script>
+    <script src="lib/sortablejs/Sortable.min.js"></script>
     ```
-    > You can optionally include a version parameter to avoid browser caching:
+    > You can optionally add a cache-busting query string (one of several cache-busting approaches):
     > ```html
-    > <script src="lib/sortable/dist/js/Sortable.min.js?v=1.15.7"></script>
+    > <script src="lib/sortablejs/Sortable.min.js?v=1.15.7"></script>
     > ```
 
     For local installation:
-    1. Download the latest version of SortableJS from [GitHub](https://github.com/SortableJS/Sortable/releases)
-    2. Create the folder structure in `wwwroot`: `lib/sortable/dist/js/`
+    1. Download the latest version of SortableJS ([GitHub](https://github.com/SortableJS/Sortable/releases))
+    2. Create the folder structure in `wwwroot`: `lib/sortablejs/`
     3. Place the `Sortable.min.js` file in the created folder
 
-2. (Optional) Add base styles to the same file where you added the script:
-```html
-<link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css" />
-```
-> You can also specify the version manually to prevent browser caching:
-> ```html
-> <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css?v=6.0.0" />
-> ```
-> Or automatically insert the current assembly version (works in `.razor` or `.cshtml` files).
-> Add this code within the `<head>` element, or for **Blazor WebAssembly**, place it inside the `<HeadContent>` section of `App.razor`:
-> ```razor
-> <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css?v=@(typeof(BlazorSortable.Sortable<>).Assembly.GetName().Version)" />
-> ```
-> > For this to work in **Blazor WebAssembly**, make sure you have the following line in your `Program.cs`:
-> > ```csharp
-> > builder.RootComponents.Add<HeadOutlet>("head::after");
-> > ```
+2. (Optional) Add base styles to the `<head>` element of the same host page:
+    ```html
+    <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css" />
+    ```
+    > You can also add a cache-busting query string (one of several cache-busting approaches):
+    > ```html
+    > <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css?v=6.0.1" />
+    > ```
+    > Or automatically use the current assembly version as the cache-busting value from a Razor file:
+    > ```razor
+    > <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css?v=@(typeof(BlazorSortable.Sortable<>).Assembly.GetName().Version)" />
+    > ```
+    > For **Blazor WebAssembly Standalone App**, place this inside the `<HeadContent>` section of `App.razor` and make sure `Program.cs` contains:
+    > ```csharp
+    > builder.RootComponents.Add<HeadOutlet>("head::after");
+    > ```
 
-3. Add services in `Program.cs`:
-```csharp
-using BlazorSortable;
+3. Add services in the `Program.cs` of the app where the component runs (`InteractiveWebAssembly` components require registration in the client app):
+    ```csharp
+    using BlazorSortable;
 
-// ...
+    // ...
 
-builder.Services.AddSortable();
-```
+    builder.Services.AddSortable();
+    ```
 
 4. Add the using directive in `_Imports.razor`:
-```razor
-@using BlazorSortable
-```
+    ```razor
+    @using BlazorSortable
+    ```
 
-## Usage Examples
-
-```razor
-<Sortable Items="Persons"
-          Class="my-sortable"
-          Group="group1">
-    <PersonComponent Person="context" />
-</Sortable>
-```
+## Usage Example
 
 ```razor
-<Sortable TItem="Person"
-          Items="Persons"
-          Class="my-sortable"
-          Group="group1"
-          Context="person">
-    <div class="person-card">
-        <h4>@person.Name</h4>
-        <p>@person.Email</p>
-        <span class="badge">@person.Department</span>
-    </div>
-</Sortable>
-```
+<div style="display: flex; gap: 16px;">
+    <Sortable Items="@(["Write docs", "Add tests", "Publish package"])"
+              Group="tasks"
+              Style="display: flex; flex-direction: column; gap: 8px; width: 180px; min-height: 96px; padding: 12px; border: 2px dashed #d0d7de; border-radius: 6px;">
+        <div style="padding: 10px 12px; border: 1px solid #d0d7de; border-radius: 6px; background: white; cursor: grab; user-select: none;">
+            @context
+        </div>
+    </Sortable>
 
-```razor
-<Sortable TItem="object"
-          Class="my-sortable-drop-zone"
-          Group="group1" />
+    <Sortable Items="@(["Create project"])"
+              Group="tasks"
+              Style="display: flex; flex-direction: column; gap: 8px; width: 180px; min-height: 96px; padding: 12px; border: 2px dashed #d0d7de; border-radius: 6px;">
+        <div style="padding: 10px 12px; border: 1px solid #d0d7de; border-radius: 6px; background: white; cursor: grab; user-select: none;">
+            @context
+        </div>
+    </Sortable>
+
+    <Sortable TItem="object"
+              Group="delete"
+              Put="SortablePutMode.Groups"
+              PutGroups="@(["tasks"])"
+              Style="width: 180px; min-height: 96px; padding: 12px; border: 2px dashed #dc3545; border-radius: 6px;" />
+</div>
 ```
 
 ## Component Parameters
@@ -122,7 +118,7 @@ builder.Services.AddSortable();
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `TItem` | — | — | The type of items in the list |
+| `TItem` | - | - | The type of items in the list |
 | `Items` | `IList<TItem>?` | `null` | List of items to display and sort |
 | `ChildContent` | `RenderFragment<TItem>?` | `null` | Template for displaying each list item. Can be a component, HTML elements, or any Razor markup |
 | `KeySelector` | `Func<TItem, object>?` | `null` | Function for generating the key used in `@key`. If not set, the item itself is used |
@@ -135,14 +131,14 @@ builder.Services.AddSortable();
 | `Pull` | `SortablePullMode?` | `null` | Mode for pulling items from the list |
 | `PullGroups` | `string[]?` | `null` | **Required when `Pull="SortablePullMode.Groups"`.** Specifies the groups into which items from this list can be dragged |
 | `CloneFunction` | `Func<TItem, TItem>?` | `null` | **Required when `Pull="SortablePullMode.Clone"`.** A factory method used to create a clone of the dragged item |
-| `PullFunction` | `Predicate<SortableTransferContext<TItem>>?` | `null` | **Required when `Pull="SortablePullMode.Function"`.** Function to determine if an item can be pulled to the target Sortable component. **Works only in Blazor WebAssembly** |
+| `PullFunction` | `Predicate<SortableTransferContext<TItem>>?` | `null` | **Required when `Pull="SortablePullMode.Function"`.** Function to determine if an item can be pulled to the target Sortable component. **Works only when the component runs on WebAssembly.** |
 | `Put` | `SortablePutMode?` | `null` | Mode for adding items to the list |
 | `PutGroups` | `string[]?` | `null` | **Required when `Put="SortablePutMode.Groups"`.** Specifies the groups from which items are allowed to be added |
-| `PutFunction` | `Predicate<SortableTransferContext<object>>?` | `null` | **Required when `Put="SortablePutMode.Function"`.** Function to determine if an item can be put into this list. **Works only in Blazor WebAssembly** |
-| `ConvertFunction` | `Func<SortableTransferContext<object>, TItem?>?` | `null` | Function to convert items from other Sortable component to the target type |
+| `PutFunction` | `Predicate<SortableTransferContext<object>>?` | `null` | **Required when `Put="SortablePutMode.Function"`.** Function to determine if an item can be put into this list. **Works only when the component runs on WebAssembly.** |
+| `ConvertFunction` | `Func<SortableTransferContext<object>, TItem?>?` | `null` | Function to convert items from another Sortable component to the target type |
 | `Sort` | `bool` | `true` | Enables or disables sorting of items within the list |
 | `Delay` | `int` | `0` | Time in milliseconds to define when the sorting should start. Unfortunately, due to browser restrictions, delaying is not possible on IE or Edge with native drag and drop |
-| `DelayOnTouchOnly` | `bool` | `false` | Whether or not the delay should be applied only if the user is using touch (eg. on a mobile device). No delay will be applied in any other case |
+| `DelayOnTouchOnly` | `bool` | `false` | Whether or not the delay should be applied only if the user is using touch (e.g., on a mobile device). No delay will be applied in any other case |
 | `TouchStartThreshold` | `int` | `0` | This option sets the minimum pointer movement that must occur before the delayed sorting is cancelled. Values between `3` to `5` are good |
 | `Disabled` | `bool` | `false` | Disables the Sortable component when set to true |
 | `Animation` | `int` | `150` | Animation duration in milliseconds |
@@ -156,9 +152,9 @@ builder.Services.AddSortable();
 | `SwapThreshold` | `double` | `1` | Percentage of the target that the swap zone will take up, as a float between `0` and `1` |
 | `InvertSwap` | `bool` | `false` | Set to true to set the swap zone to the sides of the target, for the effect of sorting "in between" items |
 | `InvertedSwapThreshold` | `double` | `1` | Percentage of the target that the inverted swap zone will take up, as a float between `0` and `1` |
-| `ForceFallback` | `bool` | `true` | If set to true, the Fallback for non HTML5 Browser will be used, even if we are using an HTML5 Browser |
+| `ForceFallback` | `bool` | `true` | If set to true, the fallback for non-HTML5 browsers will be used, even if an HTML5 browser is used |
 | `FallbackClass` | `string` | `"sortable-fallback"` | CSS class for the element in fallback mode |
-| `FallbackOnBody` | `bool` | `false` | Appends the cloned DOM Element into the Document's Body |
+| `FallbackOnBody` | `bool` | `false` | Appends the cloned DOM element to the document body |
 | `FallbackTolerance` | `int` | `0` | Emulates the native drag threshold. Specify in pixels how far the mouse should move before it's considered as a drag. `3` to `5` are probably good values |
 | `Scroll` | `bool` | `true` | Enables scrolling of the container during dragging |
 | `OnUpdate` | `Action<SortableEventArgs<TItem>>?` | `null` | Raised when the order of items is changed |
@@ -187,7 +183,7 @@ builder.Services.AddSortable();
 ## Events
 
 All events receive a `SortableEventArgs<TItem>` parameter.  
-Functions like `PullFunction`, `PutFunction` and `ConvertFunction` use a `SortableTransferContext<TItem>` parameter.
+Functions like `PullFunction`, `PutFunction` and `ConvertFunction` use a `SortableTransferContext<...>` parameter.
 
 ### SortableEventArgs
 
@@ -224,26 +220,27 @@ The `ISortableInfo` interface provides information about a sortable component.
 ## Notes
 
 - **Order of events when dragging between lists:**
-  1. `OnAdd` is triggered **first** — during this event, the item is **still present in the source list**.
-  2. `OnRemove` is triggered **after**.
+    1. `OnAdd` is triggered **first** - during this event, the item is **still present in the source list**.
+    2. `OnRemove` is triggered **after**.
 
-- **Events use `Action<T>?` instead of `EventCallback<T>`.**  
-  **Reason:** `EventCallback.InvokeAsync` automatically triggers `ComponentBase.StateHasChanged` in the parent component, which causes conflicts between the DOM and the data model for this component.
+- **Events use `Action<T>?` instead of `EventCallback<T>`:**  
+    `EventCallback.InvokeAsync()` automatically triggers `ComponentBase.StateHasChanged()` in the parent component, which causes conflicts between the DOM and the data model for this component.
 
 - **Type mismatch / failed conversion:**  
-  If item types don’t match or the `ConvertFunction` returns `null`, the item is **not added** to the target list and is **remains in its original position**.
+    If item types don't match or the `ConvertFunction` returns `null`, the item is **not added** to the target list and **remains in its original position**.
 
 - **Dragging issues on scrolled page:**  
-  If the dragged element appears misaligned when the page is scrolled, set
-  ```razor
-  ForceFallback="false"
-  ```
-  **or**
-  ```razor
-  FallbackOnBody="true"
-  ```
+    If the dragged element appears misaligned when the page is scrolled, set
+    ```razor
+    ForceFallback="false"
+    ```
+    **or**
+    ```razor
+    FallbackOnBody="true"
+    ```
 
-- **Blazor Server limitation:**  
-  `PullFunction` and `PutFunction` require synchronous JS-to-.NET calls used by Sortable.js,
-  which are only available in **Blazor WebAssembly**.
-  On Blazor Server these functions cannot work and will throw `NotSupportedException`.
+- **Server-side interactivity limitation:**  
+    `PullFunction` and `PutFunction` require synchronous JS-to-.NET calls used by SortableJS,
+    which are only available when the component runs on WebAssembly.
+    These options are not supported with server-side interactivity and will throw a `PlatformNotSupportedException`.
+    > Note: Prerendering is supported, but these options require WebAssembly at runtime.

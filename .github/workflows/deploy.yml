@@ -1,11 +1,11 @@
-name: Deploy BlazorSortableDemo to GitHub Pages
+name: Deploy BlazorSortableSample to GitHub Pages
 
 on:
   push:
     branches:
       - main  # Run only when pushing to the main branch
     paths:
-      - 'samples/BlazorSortableDemo/**'  # Trigger only if files in this project change
+      - 'samples/BlazorSortableSample/**'  # Trigger only if files in this project change
   workflow_dispatch:  # Ability to manually trigger the workflow via the GitHub Actions interface
 
 jobs:
@@ -15,18 +15,18 @@ jobs:
     steps:
       # 1. Checkout the repository
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      # 2. Setup .NET 9 SDK
-      - name: Setup .NET 9 SDK
-        uses: actions/setup-dotnet@v4
+      # 2. Setup .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       # 3. Publish the Blazor WebAssembly app
       #    This builds the project and outputs static files to 'publish/wwwroot'
       - name: Publish Blazor WebAssembly app
-        run: dotnet publish ./samples/BlazorSortableDemo/BlazorSortableDemo.csproj -c Release -o publish
+        run: dotnet publish ./samples/BlazorSortableSample/BlazorSortableSample.csproj -c Release -o publish
 
       # 4. Update the <base href> in index.html for GitHub Pages
       #    Ensures that the app works under /repository-name/ instead of /

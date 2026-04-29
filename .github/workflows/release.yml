@@ -5,18 +5,21 @@ on:
     tags:
       - 'v*'
 
+env:
+  CSPROJ_FILE: src/BlazorSortable/BlazorSortable.csproj
+
 jobs:
   release:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Setup .NET 9 SDK
-        uses: actions/setup-dotnet@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '8.0.x'
 
       - name: Extract version from tag
         id: version
@@ -24,12 +27,11 @@ jobs:
 
       - name: Verify .csproj version matches tag
         run: |
-          csproj_file=src/BlazorSortable/BlazorSortable.csproj
-          echo "Using project: $csproj_file"
+          echo "Using project: $CSPROJ_FILE"
 
           sudo apt-get update && sudo apt-get install -y libxml2-utils
 
-          csproj_version=$(xmllint --xpath "/*[local-name()='Project']/*[local-name()='PropertyGroup']/*[local-name()='Version']/text()" "$csproj_file")
+          csproj_version=$(xmllint --xpath "/*[local-name()='Project']/*[local-name()='PropertyGroup']/*[local-name()='Version']/text()" "$CSPROJ_FILE")
           tag_version="${{ steps.version.outputs.version }}"
 
           echo "csproj version: $csproj_version"
@@ -41,16 +43,16 @@ jobs:
           fi
 
       - name: Restore dependencies
-        run: dotnet restore "$csproj_file"
+        run: dotnet restore "$CSPROJ_FILE"
 
       - name: Build
-        run: dotnet build "$csproj_file" --configuration Release --no-restore
+        run: dotnet build "$CSPROJ_FILE" --configuration Release --no-restore
 
       - name: Pack
-        run: dotnet pack "$csproj_file" --configuration Release --no-build --output ./artifacts
+        run: dotnet pack "$CSPROJ_FILE" --configuration Release --no-build --output ./artifacts
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.ref_name }}
           prerelease: ${{ contains(github.ref_name, '-') }}

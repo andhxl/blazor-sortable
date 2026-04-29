@@ -9,15 +9,18 @@ namespace BlazorSortable;
 public static class SortableExtensions
 {
     /// <summary>
-    /// Adds the necessary services for Sortable functionality to the service collection.
+    /// Adds Sortable services to the service collection.
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to add services to.</param>
     /// <returns>The <see cref="IServiceCollection"/> for chaining.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="services"/> is null.
+    /// </exception>
     public static IServiceCollection AddSortable(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddScoped<ISortableRegistry, SortableRegistry>();
+        services.AddScoped<SortableRegistry>();
 
         return services;
     }
