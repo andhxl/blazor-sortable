@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="icon.png" />
+    <File Path="LICENSE.txt" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="samples/BlazorSortableSample/BlazorSortableSample.csproj" />
+  <Project Path="src/BlazorSortable/BlazorSortable.csproj" />
+</Solution>

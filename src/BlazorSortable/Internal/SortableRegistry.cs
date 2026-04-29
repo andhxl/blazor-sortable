@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 
 namespace BlazorSortable.Internal;
 
-internal sealed class SortableRegistry : ISortableRegistry
+internal sealed class SortableRegistry
 {
     private readonly ConcurrentDictionary<string, ISortableList> _sortables = [];
 
@@ -14,14 +14,8 @@ internal sealed class SortableRegistry : ISortableRegistry
 
     public void Unregister(string id) => _sortables.TryRemove(id, out _);
 
-    public ISortableList this[string id]
-    {
-        get
-        {
-            if (_sortables.TryGetValue(id, out var sortable))
-                return sortable;
-
-            throw new KeyNotFoundException($"Sortable with ID '{id}' is not registered.");
-        }
-    }
+    public ISortableList this[string id] =>
+        _sortables.TryGetValue(id, out var sortable)
+            ? sortable
+            : throw new KeyNotFoundException($"Sortable with ID '{id}' is not registered.");
 }

@@ -1,4 +1,4 @@
-namespace BlazorSortableDemo.Components;
+namespace BlazorSortableSample.Components;
 
 public static class Utils
 {

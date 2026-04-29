@@ -96,13 +96,12 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// </summary>
     /// <remarks>
     /// Used only when <see cref="Pull"/> is set to <see cref="SortablePullMode.Function"/>.
-    /// This feature does <b>not</b> work when the application is running in anything
-    /// other than <b>Blazor WebAssembly</b>.
-    /// Sortable.js requires a synchronous JS-to-.NET call, which is not supported
-    /// outside of WebAssembly (for example, in Blazor Server or Blazor Hybrid).
+    /// This feature works only when the component runs on WebAssembly.
+    /// SortableJS requires a synchronous JS-to-.NET call, which is not supported
+    /// outside of WebAssembly, for example with server-side interactivity.
     /// </remarks>
-    /// <exception cref="NotSupportedException">
-    /// Thrown when used in a non-WebAssembly environment.
+    /// <exception cref="PlatformNotSupportedException">
+    /// Thrown when used outside of WebAssembly.
     /// </exception>
     [Parameter]
     public Predicate<SortableTransferContext<TItem>>? PullFunction { get; set; }
@@ -127,13 +126,12 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// </summary>
     /// <remarks>
     /// Used only when <see cref="Put"/> is set to <see cref="SortablePutMode.Function"/>.
-    /// This feature does <b>not</b> work when the application is running in anything
-    /// other than <b>Blazor WebAssembly</b>.
-    /// Sortable.js requires a synchronous JS-to-.NET call, which is not supported
-    /// outside of WebAssembly (for example, in Blazor Server or Blazor Hybrid).
+    /// This feature works only when the component runs on WebAssembly.
+    /// SortableJS requires a synchronous JS-to-.NET call, which is not supported
+    /// outside of WebAssembly, for example with server-side interactivity.
     /// </remarks>
-    /// <exception cref="NotSupportedException">
-    /// Thrown when used in a non-WebAssembly environment.
+    /// <exception cref="PlatformNotSupportedException">
+    /// Thrown when used outside of WebAssembly.
     /// </exception>
     [Parameter]
     public Predicate<SortableTransferContext<object>>? PutFunction { get; set; }
@@ -162,7 +160,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public int Delay { get; set; }
 
     /// <summary>
-    /// Whether or not the delay should be applied only if the user is using touch (eg. on a mobile device). No delay will be applied in any other case.
+    /// Whether or not the delay should be applied only if the user is using touch (e.g., on a mobile device). No delay will be applied in any other case.
     /// </summary>
     [Parameter]
     public bool DelayOnTouchOnly { get; set; }
@@ -258,9 +256,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public double InvertedSwapThreshold { get; set; } = 1;
 
     /// <summary>
-    /// If set to true, the Fallback for non HTML5 Browser will be used, even if we are using an HTML5 Browser.
-    /// This gives us the possibility to test the behaviour for older Browsers even in newer Browser, or make the Drag 'n Drop feel more consistent between Desktop, Mobile and old Browsers.
-    /// On top of that, the Fallback always generates a copy of that DOM Element and appends the class fallbackClass defined in the options. This behaviour controls the look of this 'dragged' Element.
+    /// If set to true, the fallback for non-HTML5 browsers will be used, even if an HTML5 browser is used.
+    /// This makes it possible to test behavior for older browsers in newer browsers, or make drag and drop feel more consistent between desktop, mobile, and old browsers.
+    /// The fallback always generates a copy of the DOM element and appends the class defined by <see cref="FallbackClass"/>. This behavior controls the look of the dragged element.
     /// </summary>
     [Parameter]
     public bool ForceFallback { get; set; } = true;
@@ -272,7 +270,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public string FallbackClass { get; set; } = "sortable-fallback";
 
     /// <summary>
-    /// Appends the cloned DOM Element into the Document's Body.
+    /// Appends the cloned DOM element to the document body.
     /// </summary>
     [Parameter]
     public bool FallbackOnBody { get; set; }
@@ -390,8 +388,8 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     //[Parameter]
     //public Action<TItem>? OnDeselect { get; set; }
 
-    [Inject] private ISortableRegistry SortableRegistry { get; set; } = default!;
-    [Inject] private IJSRuntime Js { get; set; } = default!;
+    [Inject] private SortableRegistry SortableRegistry { get; set; } = default!;
+    [Inject] private IJSRuntime JS { get; set; } = default!;
 
     private IJSObjectReference? jsModule;
     private DotNetObjectReference<Sortable<TItem>>? selfReference;
@@ -412,8 +410,6 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 break;
             case SortablePullMode.Function:
                 ArgumentNullException.ThrowIfNull(PullFunction);
-                if (!OperatingSystem.IsBrowser())
-                    throw new NotSupportedException("PullFunction is only supported in Blazor WebAssembly.");
                 break;
         }
 
@@ -424,8 +420,6 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 break;
             case SortablePutMode.Function:
                 ArgumentNullException.ThrowIfNull(PutFunction);
-                if (!OperatingSystem.IsBrowser())
-                    throw new NotSupportedException("PutFunction is only supported in Blazor WebAssembly.");
                 break;
         }
     }
@@ -435,8 +429,18 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     {
         if (!firstRender) return;
 
-        jsModule = await Js.InvokeAsync<IJSObjectReference>("import",
-            $"./_content/BlazorSortable/js/blazor-sortable.js{SortableAssemblyMetadata.VersionQuery}");
+        // Check WebAssembly-only options here because OnParametersSet can run during
+        // server prerendering, where InteractiveWebAssembly components are not in the browser yet
+        if ((Pull == SortablePullMode.Function || Put == SortablePutMode.Function) &&
+            !OperatingSystem.IsBrowser())
+        {
+            throw new PlatformNotSupportedException(
+                $"{nameof(PullFunction)} and {nameof(PutFunction)} are only supported when the component runs on WebAssembly.");
+        }
+
+        jsModule = await JS.InvokeAsync<IJSObjectReference>("import",
+            "./_content/BlazorSortable/js/blazor-sortable.js" + AssemblyVersionQuery.Value);
+
         selfReference = DotNetObjectReference.Create(this);
         await jsModule.InvokeVoidAsync("initSortable", Id, BuildOptions(), selfReference);
 
@@ -455,11 +459,11 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             }
             catch (JSDisconnectedException)
             {
-                // Ignore - Blazor Server Circuit Disconnected
+                // Ignore disconnected server-side circuits
             }
         }
 
-        // Dispose selfReference after JavaScript module
+        // Dispose selfReference after JS module
         selfReference?.Dispose();
 
         SortableRegistry.Unregister(Id);
@@ -533,9 +537,8 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         return options;
     }
 
-    private object? GetPull()
-    {
-        return Pull switch
+    private object? GetPull() =>
+        Pull switch
         {
             SortablePullMode.True => true,
             SortablePullMode.False => false,
@@ -544,11 +547,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             SortablePullMode.Function => "function",
             _ => null
         };
-    }
 
-    private object? GetPut()
-    {
-        return Put switch
+    private object? GetPut() =>
+        Put switch
         {
             SortablePutMode.True => true,
             SortablePutMode.False => false,
@@ -556,7 +557,6 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             SortablePutMode.Function => "function",
             _ => null
         };
-    }
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
@@ -624,7 +624,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         if (item is null)
             return;
 
-        // Dropzone mode: when Items is null, we still accept the drop event but do not store the item locally
+        // Drop zone mode: when Items is null, we still accept the drop event but do not store the item locally
         if (Items is not null)
         {
             Items.Insert(newIndex, item);

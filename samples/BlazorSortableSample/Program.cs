@@ -1,5 +1,5 @@
 using BlazorSortable;
-using BlazorSortableDemo;
+using BlazorSortableSample;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Radzen;
