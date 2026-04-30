@@ -4,22 +4,22 @@ export function initSortable(id, options, component) {
 
     if (options.group.pull === 'function') {
         options.group.pull = function (to, from, dragEl, evt) {
-            return component.invokeMethod('OnPullJs', to.el.id);
+            return component.invokeMethod('OnPullJS', to.el.id);
         };
     }
     if (options.group.put === 'function') {
         options.group.put = function (to, from, dragEl, evt) {
-            return component.invokeMethod('OnPutJs', from.el.id);
+            return component.invokeMethod('OnPutJS', from.el.id);
         };
     }
 
     el._sortable = new Sortable(el, {
         ...options,
         onStart: (evt) => {
-            component.invokeMethodAsync('OnStartJs', evt.oldIndex);
+            component.invokeMethodAsync('OnStartJS', evt.oldIndex);
         },
         onEnd: (evt) => {
-            component.invokeMethodAsync('OnEndJs');
+            component.invokeMethodAsync('OnEndJS');
         },
         onUpdate: (evt) => {
             // Revert the DOM to match the .NET state
@@ -27,10 +27,10 @@ export function initSortable(id, options, component) {
             evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex]);
 
             // Notify .NET to update its model and re-render
-            component.invokeMethodAsync('OnUpdateJs', evt.oldIndex, evt.newIndex);
+            component.invokeMethodAsync('OnUpdateJS', evt.oldIndex, evt.newIndex);
         },
         onAdd: (evt) => {
-            component.invokeMethodAsync('OnAddJs', evt.from.id, evt.oldIndex, evt.newIndex, evt.pullMode === 'clone');
+            component.invokeMethodAsync('OnAddJS', evt.from.id, evt.oldIndex, evt.newIndex, evt.pullMode === 'clone');
         },
         onRemove: (evt) => {
             evt.item.remove();
@@ -40,7 +40,7 @@ export function initSortable(id, options, component) {
                 evt.clone?.remove(); // Handle MultiDrag null case
             }
             else {
-                component.invokeMethodAsync('OnRemoveJs', evt.oldIndex, evt.to.id, evt.newIndex);
+                component.invokeMethodAsync('OnRemoveJS', evt.oldIndex, evt.to.id, evt.newIndex);
             }
         }
     });

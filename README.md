@@ -183,7 +183,7 @@ Add to your .csproj file:
 ## Events
 
 All events receive a `SortableEventArgs<TItem>` parameter.  
-Functions like `PullFunction`, `PutFunction` and `ConvertFunction` use a `SortableTransferContext<...>` parameter.
+Functions like `PullFunction`, `PutFunction` and `ConvertFunction` use a `SortableTransferContext<T>` parameter.
 
 ### SortableEventArgs
 
@@ -224,7 +224,7 @@ The `ISortableInfo` interface provides information about a sortable component.
     2. `OnRemove` is triggered **after**.
 
 - **Events use `Action<T>?` instead of `EventCallback<T>`:**  
-    `EventCallback.InvokeAsync()` automatically triggers `ComponentBase.StateHasChanged()` in the parent component, which causes conflicts between the DOM and the data model for this component.
+    `EventCallback<T>` uses the component event pipeline, which calls `StateHasChanged()` on the receiving `ComponentBase` after the handler runs. This causes conflicts between the DOM and the data model for this component.
 
 - **Type mismatch / failed conversion:**  
     If item types don't match or the `ConvertFunction` returns `null`, the item is **not added** to the target list and **remains in its original position**.

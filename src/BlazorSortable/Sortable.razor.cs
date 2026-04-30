@@ -347,7 +347,8 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Event that occurs when the order of items in the list is updated.
     /// </summary>
     /// <remarks>
-    /// Uses Action instead of EventCallback to prevent automatic StateHasChanged in the parent component.
+    /// Uses <see cref="Action{T}"/> instead of <see cref="EventCallback{TValue}"/>
+    /// to avoid an extra render from the component event pipeline.
     /// </remarks>
     [Parameter]
     public Action<SortableEventArgs<TItem>>? OnUpdate { get; set; }
@@ -356,7 +357,8 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Event that occurs when an item is added to the list.
     /// </summary>
     /// <remarks>
-    /// Uses Action instead of EventCallback to prevent automatic StateHasChanged in the parent component.
+    /// Uses <see cref="Action{T}"/> instead of <see cref="EventCallback{TValue}"/>
+    /// to avoid an extra render from the component event pipeline.
     /// </remarks>
     [Parameter]
     public Action<SortableEventArgs<TItem>>? OnAdd { get; set; }
@@ -365,7 +367,8 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Event that occurs when an item is removed from the list.
     /// </summary>
     /// <remarks>
-    /// Uses Action instead of EventCallback to prevent automatic StateHasChanged in the parent component.
+    /// Uses <see cref="Action{T}"/> instead of <see cref="EventCallback{TValue}"/>
+    /// to avoid an extra render from the component event pipeline.
     /// </remarks>
     [Parameter]
     public Action<SortableEventArgs<TItem>>? OnRemove { get; set; }
@@ -374,7 +377,8 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     ///// Event that occurs when an item is selected in multi-drag mode.
     ///// </summary>
     ///// <remarks>
-    ///// Uses Action instead of EventCallback to prevent automatic StateHasChanged in the parent component.
+    ///// Uses <see cref="Action{T}"/> instead of <see cref="EventCallback{TValue}"/>
+    ///// to avoid an extra render from the component event pipeline.
     ///// </remarks>
     //[Parameter]
     //public Action<TItem>? OnSelect { get; set; }
@@ -383,7 +387,8 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     ///// Event that occurs when an item is deselected in multi-drag mode.
     ///// </summary>
     ///// <remarks>
-    ///// Uses Action instead of EventCallback to prevent automatic StateHasChanged in the parent component.
+    ///// Uses <see cref="Action{T}"/> instead of <see cref="EventCallback{TValue}"/>
+    ///// to avoid an extra render from the component event pipeline.
     ///// </remarks>
     //[Parameter]
     //public Action<TItem>? OnDeselect { get; set; }
@@ -427,7 +432,8 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender) return;
+        if (!firstRender)
+            return;
 
         // Check WebAssembly-only options here because OnParametersSet can run during
         // server prerendering, where InteractiveWebAssembly components are not in the browser yet
@@ -559,13 +565,13 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnStartJs(int index) => draggedItemIndex = index;
+    public void OnStartJS(int index) => draggedItemIndex = index;
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnEndJs() => draggedItemIndex = -1;
+    public void OnEndJS() => draggedItemIndex = -1;
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public bool OnPullJs(string toId)
+    public bool OnPullJS(string toId)
     {
         var item = Items![draggedItemIndex];
         var to = SortableRegistry[toId];
@@ -574,7 +580,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public bool OnPutJs(string fromId)
+    public bool OnPutJS(string fromId)
     {
         var from = SortableRegistry[fromId];
         var item = from[from.DraggedItemIndex];
@@ -583,7 +589,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnUpdateJs(int oldIndex, int newIndex)
+    public void OnUpdateJS(int oldIndex, int newIndex)
     {
         var item = Items![oldIndex];
 
@@ -603,22 +609,19 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnAddJs(string fromId, int oldIndex, int newIndex, bool isClone)
+    public void OnAddJS(string fromId, int oldIndex, int newIndex, bool isClone)
     {
         var from = SortableRegistry[fromId];
         from.SuppressNextRemove = !isClone;
 
         var sourceObject = from[oldIndex];
 
-        TItem? item = default;
-        if (ConvertFunction is not null)
-        {
-            item = ConvertFunction(new SortableTransferContext<object>(sourceObject, from, this));
-        }
-        else if (sourceObject is TItem sourceItem)
-        {
-            item = sourceItem;
-        }
+        var item = ConvertFunction is not null
+            ? ConvertFunction(new SortableTransferContext<object>(sourceObject, from, this))
+            : sourceObject is TItem sourceItem
+                ? sourceItem
+                : default;
+
         if (item is null)
             return;
 
@@ -639,7 +642,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnRemoveJs(int oldIndex, string toId, int newIndex)
+    public void OnRemoveJS(int oldIndex, string toId, int newIndex)
     {
         if (suppressNextRemove)
         {
@@ -662,10 +665,10 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     }
 
     //[JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    //public void OnSelectJs(int index) => OnSelect?.Invoke(Items![index]);
+    //public void OnSelectJS(int index) => OnSelect?.Invoke(Items![index]);
 
     //[JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    //public void OnDeselectJs(int index) => OnDeselect?.Invoke(Items![index]);
+    //public void OnDeselectJS(int index) => OnDeselect?.Invoke(Items![index]);
 
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
@@ -674,7 +677,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         get
         {
             var item = Items![index]!;
-            return Pull == SortablePullMode.Clone ? CloneFunction!(item)! : item;
+            return Pull == SortablePullMode.Clone
+                ? CloneFunction!(item)!
+                : item;
         }
     }
 
