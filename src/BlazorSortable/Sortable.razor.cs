@@ -141,11 +141,12 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public Predicate<SortableTransferContext<object>>? PutFunction { get; set; }
 
     /// <summary>
-    /// Function used to convert items from another Sortable component to the target item type.
+    /// Converts an incoming item when it is not assignable to the target item type.
     /// </summary>
     /// <remarks>
-    /// Use this when items are dragged between Sortable components with different item types.
-    /// Return <see langword="null"/> to reject the item.
+    /// This function is used only when an item dragged from another Sortable component
+    /// cannot be assigned to <typeparamref name="TItem"/> directly.
+    /// Return <see langword="null"/> when the item cannot be converted.
     /// </remarks>
     [Parameter]
     public Func<SortableTransferContext<object>, TItem?>? ConvertFunction { get; set; }
@@ -619,7 +620,11 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         var sourceObject = from[oldIndex];
 
         TItem item;
-        if (ConvertFunction is not null)
+        if (sourceObject is TItem sourceItem)
+        {
+            item = sourceItem;
+        }
+        else if (ConvertFunction is not null)
         {
             var convertedItem = ConvertFunction(new SortableTransferContext<object>(
                 sourceObject, from, this));
@@ -628,10 +633,6 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 return;
 
             item = convertedItem;
-        }
-        else if (sourceObject is TItem sourceItem)
-        {
-            item = sourceItem;
         }
         else
         {
