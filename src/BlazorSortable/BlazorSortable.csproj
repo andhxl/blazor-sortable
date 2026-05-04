@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild Condition="$(Configuration) == 'Release'">true</GeneratePackageOnBuild>
-    <Version>6.0.2</Version>
+    <Version>7.0.0</Version>
     <Authors>andhxl</Authors>
     <Description>A Blazor component that wraps SortableJS, a library for drag-and-drop sorting.</Description>
     <Copyright>© $([System.DateTime]::Now.Year) $(Authors)</Copyright>
