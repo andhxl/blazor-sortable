@@ -141,11 +141,12 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public Predicate<SortableTransferContext<object>>? PutFunction { get; set; }
 
     /// <summary>
-    /// Function used to convert items from another Sortable component to the target item type.
+    /// Converts an incoming item when it is not assignable to the target item type.
     /// </summary>
     /// <remarks>
-    /// Use this when items are dragged between Sortable components with different item types.
-    /// Return <see langword="null"/> to reject the item.
+    /// This function is used only when an item dragged from another Sortable component
+    /// cannot be assigned to <typeparamref name="TItem"/> directly.
+    /// Return <see langword="null"/> when the item cannot be converted.
     /// </remarks>
     [Parameter]
     public Func<SortableTransferContext<object>, TItem?>? ConvertFunction { get; set; }
@@ -448,7 +449,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         }
 
         jsModule = await JS.InvokeAsync<IJSObjectReference>("import",
-            "./_content/BlazorSortable/js/blazor-sortable.js" + AssemblyVersionQuery.Value);
+            "./_content/BlazorSortable/blazor-sortable.js" + AssemblyVersionQuery.Value);
 
         selfReference = DotNetObjectReference.Create(this);
         await jsModule.InvokeVoidAsync("initSortable", Id, BuildOptions(), selfReference);
@@ -604,10 +605,16 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
         Items.RemoveAt(oldIndex);
         Items.Insert(newIndex, item);
-        StateHasChanged();
 
-        OnUpdate?.Invoke(new SortableEventArgs<TItem>(
-            item, this, oldIndex, this, newIndex));
+        try
+        {
+            OnUpdate?.Invoke(new SortableEventArgs<TItem>(
+                item, this, oldIndex, this, newIndex));
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
@@ -619,7 +626,11 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         var sourceObject = from[oldIndex];
 
         TItem item;
-        if (ConvertFunction is not null)
+        if (sourceObject is TItem sourceItem)
+        {
+            item = sourceItem;
+        }
+        else if (ConvertFunction is not null)
         {
             var convertedItem = ConvertFunction(new SortableTransferContext<object>(
                 sourceObject, from, this));
@@ -629,26 +640,25 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
             item = convertedItem;
         }
-        else if (sourceObject is TItem sourceItem)
-        {
-            item = sourceItem;
-        }
         else
         {
             return;
         }
 
         // Drop zone mode: when Items is null, we still accept the drop event but do not store the item locally.
-        if (Items is not null)
-        {
-            Items.Insert(newIndex, item);
-            StateHasChanged();
-        }
+        Items?.Insert(newIndex, item);
 
         from.SuppressNextRemove = false;
 
-        OnAdd?.Invoke(new SortableEventArgs<TItem>(
-            item, from, oldIndex, this, newIndex, isClone));
+        try
+        {
+            OnAdd?.Invoke(new SortableEventArgs<TItem>(
+                item, from, oldIndex, this, newIndex, isClone));
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
@@ -664,10 +674,16 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         var item = Items![oldIndex];
 
         Items.RemoveAt(oldIndex);
-        StateHasChanged();
 
-        OnRemove?.Invoke(new SortableEventArgs<TItem>(
-            item, this, oldIndex, SortableRegistry[toId], newIndex));
+        try
+        {
+            OnRemove?.Invoke(new SortableEventArgs<TItem>(
+                item, this, oldIndex, SortableRegistry[toId], newIndex));
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 
     //[JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
