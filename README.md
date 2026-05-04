@@ -5,7 +5,9 @@
 [![NuGet Version](https://img.shields.io/nuget/vpre/BlazorSortable?style=for-the-badge)](https://www.nuget.org/packages/BlazorSortable)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/BlazorSortable?style=for-the-badge)](https://www.nuget.org/packages/BlazorSortable)
 
-A Blazor component that wraps the [SortableJS](https://github.com/SortableJS/Sortable) library, designed for creating interactive sortable lists with drag-and-drop support. Inspired by [BlazorSortable](https://github.com/the-urlist/BlazorSortable) and represents an improved and extended implementation.
+A Blazor component that wraps [SortableJS](https://github.com/SortableJS/Sortable), a library for drag-and-drop sorting.
+
+Inspired by [BlazorSortable](https://github.com/the-urlist/BlazorSortable) and represents an improved and extended implementation.
 
 ## Installation
 
@@ -57,7 +59,7 @@ Add to your .csproj file:
     ```
     > You can also add a cache-busting query string (one of several cache-busting approaches):
     > ```html
-    > <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css?v=6.0.1" />
+    > <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css?v=6.0.2" />
     > ```
     > Or automatically use the current assembly version as the cache-busting value from a Razor file:
     > ```razor
@@ -85,19 +87,19 @@ Add to your .csproj file:
 ## Usage Example
 
 ```razor
-<div style="display: flex; gap: 16px;">
+<div class="sortable-sample">
     <Sortable Items="@(["Write docs", "Add tests", "Publish package"])"
               Group="tasks"
-              Style="display: flex; flex-direction: column; gap: 8px; width: 180px; min-height: 96px; padding: 12px; border: 2px dashed #d0d7de; border-radius: 6px;">
-        <div style="padding: 10px 12px; border: 1px solid #d0d7de; border-radius: 6px; background: white; cursor: grab; user-select: none;">
+              Class="sortable-column">
+        <div class="sortable-item">
             @context
         </div>
     </Sortable>
 
     <Sortable Items="@(["Create project"])"
               Group="tasks"
-              Style="display: flex; flex-direction: column; gap: 8px; width: 180px; min-height: 96px; padding: 12px; border: 2px dashed #d0d7de; border-radius: 6px;">
-        <div style="padding: 10px 12px; border: 1px solid #d0d7de; border-radius: 6px; background: white; cursor: grab; user-select: none;">
+              Class="sortable-column">
+        <div class="sortable-item">
             @context
         </div>
     </Sortable>
@@ -106,8 +108,44 @@ Add to your .csproj file:
               Group="delete"
               Put="SortablePutMode.Groups"
               PutGroups="@(["tasks"])"
-              Style="width: 180px; min-height: 96px; padding: 12px; border: 2px dashed #dc3545; border-radius: 6px;" />
+              Class="sortable-delete" />
 </div>
+
+<style>
+    .sortable-sample {
+        display: flex;
+        gap: 16px;
+    }
+
+    .sortable-column,
+    .sortable-delete {
+        width: 180px;
+        min-height: 96px;
+        padding: 12px;
+        border: 2px dashed #d0d7de;
+        border-radius: 6px;
+    }
+
+    .sortable-column {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .sortable-delete {
+        border-color: #dc3545;
+        overflow: hidden;
+    }
+
+    .sortable-item {
+        padding: 10px 12px;
+        border: 1px solid #d0d7de;
+        border-radius: 6px;
+        background: white;
+        cursor: grab;
+        user-select: none;
+    }
+</style>
 ```
 
 ## Component Parameters
@@ -118,33 +156,33 @@ Add to your .csproj file:
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `TItem` | - | - | The type of items in the list |
-| `Items` | `IList<TItem>?` | `null` | List of items to display and sort |
-| `ChildContent` | `RenderFragment<TItem>?` | `null` | Template for displaying each list item. Can be a component, HTML elements, or any Razor markup |
+| `TItem` | `notnull` | - | Type of items displayed, sorted, or accepted by the component |
+| `Items` | `IList<TItem>?` | `null` | Items to display and sort. If `null`, the component works as a drop zone |
+| `ChildContent` | `RenderFragment<TItem>?` | `null` | Template for displaying each item. Can be a component, HTML elements, or any Razor markup. Ignored when `Items` is `null` |
+| `Context` | `string` | `context` | Razor template context name used by `ChildContent` to refer to the current item |
 | `KeySelector` | `Func<TItem, object>?` | `null` | Function for generating the key used in `@key`. If not set, the item itself is used |
-| `Context` | `string` | `context` | Name of the parameter used in the child content template to refer to the current item |
 | `Class` | `string?` | `null` | CSS class for the container |
 | `Style` | `string?` | `null` | Inline CSS styles for the container |
 | `Attributes` | `IReadOnlyDictionary<string, object>?` | `null` | Additional custom attributes that will be rendered by the component |
 | `Id` | `string` | `Random GUID` | Unique identifier of the component. Used internally for coordination between Sortable components. Must be globally unique |
-| `Group` | `string` | `Random GUID` | Name of the group for interacting with other sortable instances |
-| `Pull` | `SortablePullMode?` | `null` | Mode for pulling items from the list |
-| `PullGroups` | `string[]?` | `null` | **Required when `Pull="SortablePullMode.Groups"`.** Specifies the groups into which items from this list can be dragged |
-| `CloneFunction` | `Func<TItem, TItem>?` | `null` | **Required when `Pull="SortablePullMode.Clone"`.** A factory method used to create a clone of the dragged item |
-| `PullFunction` | `Predicate<SortableTransferContext<TItem>>?` | `null` | **Required when `Pull="SortablePullMode.Function"`.** Function to determine if an item can be pulled to the target Sortable component. **Works only when the component runs on WebAssembly.** |
-| `Put` | `SortablePutMode?` | `null` | Mode for adding items to the list |
-| `PutGroups` | `string[]?` | `null` | **Required when `Put="SortablePutMode.Groups"`.** Specifies the groups from which items are allowed to be added |
-| `PutFunction` | `Predicate<SortableTransferContext<object>>?` | `null` | **Required when `Put="SortablePutMode.Function"`.** Function to determine if an item can be put into this list. **Works only when the component runs on WebAssembly.** |
-| `ConvertFunction` | `Func<SortableTransferContext<object>, TItem?>?` | `null` | Function to convert items from another Sortable component to the target type |
-| `Sort` | `bool` | `true` | Enables or disables sorting of items within the list |
-| `Delay` | `int` | `0` | Time in milliseconds to define when the sorting should start. Unfortunately, due to browser restrictions, delaying is not possible on IE or Edge with native drag and drop |
-| `DelayOnTouchOnly` | `bool` | `false` | Whether or not the delay should be applied only if the user is using touch (e.g., on a mobile device). No delay will be applied in any other case |
-| `TouchStartThreshold` | `int` | `0` | This option sets the minimum pointer movement that must occur before the delayed sorting is cancelled. Values between `3` to `5` are good |
+| `Group` | `string` | `Random GUID` | Name of the group for interacting with other Sortable components |
+| `Pull` | `SortablePullMode?` | `null` | Mode for pulling items from this Sortable component |
+| `PullGroups` | `string[]?` | `null` | **Required when `Pull="SortablePullMode.Groups"`.** Specifies the target groups into which items from this Sortable component can be dragged |
+| `CloneFunction` | `Func<TItem, TItem>?` | `null` | **Required when `Pull="SortablePullMode.Clone"`.** A factory method used to create a non-null clone of the dragged item |
+| `PullFunction` | `Predicate<SortableTransferContext<TItem>>?` | `null` | **Required when `Pull="SortablePullMode.Function"`.** Function to determine whether an item can be pulled to the target Sortable component. **Works only when the component runs on WebAssembly.** |
+| `Put` | `SortablePutMode?` | `null` | Mode for accepting items into this Sortable component |
+| `PutGroups` | `string[]?` | `null` | **Required when `Put="SortablePutMode.Groups"`.** Specifies the source groups from which this Sortable component can accept items |
+| `PutFunction` | `Predicate<SortableTransferContext<object>>?` | `null` | **Required when `Put="SortablePutMode.Function"`.** Function to determine whether an item can be accepted by this Sortable component. **Works only when the component runs on WebAssembly.** |
+| `ConvertFunction` | `Func<SortableTransferContext<object>, TItem?>?` | `null` | Function to convert items from another Sortable component to the target item type. Return `null` to reject the item |
+| `Sort` | `bool` | `true` | Enables or disables sorting within this Sortable component |
+| `Delay` | `int` | `0` | Time in milliseconds to define when sorting should start. Unfortunately, due to browser restrictions, delaying is not possible on IE or Edge with native drag and drop |
+| `DelayOnTouchOnly` | `bool` | `false` | Whether the delay should be applied only when the user is using touch, e.g. on a mobile device. No delay will be applied in any other case |
+| `TouchStartThreshold` | `int` | `0` | Minimum pointer movement that must occur before delayed sorting is cancelled. Values between `3` and `5` are good |
 | `Disabled` | `bool` | `false` | Disables the Sortable component when set to true |
 | `Animation` | `int` | `150` | Animation duration in milliseconds |
-| `Handle` | `string?` | `null` | CSS selector for elements that can be dragged (e.g. `.my-handle`) |
-| `Filter` | `string?` | `null` | CSS selector for elements that cannot be dragged (e.g. `.ignore-elements`) |
-| `DraggableSelector` | `Predicate<TItem>?` | `null` | Function to determine if an item can be dragged |
+| `Handle` | `string?` | `null` | CSS selector for elements that can be dragged, e.g. `.my-handle` |
+| `Filter` | `string?` | `null` | CSS selector for elements that cannot be dragged, e.g. `.ignore-elements` |
+| `DraggableSelector` | `Predicate<TItem>?` | `null` | Function to determine whether an item can be dragged |
 | `DraggableClass` | `string` | `"sortable-draggable"` | CSS class applied to items that can be dragged |
 | `GhostClass` | `string` | `"sortable-ghost"` | CSS class for the placeholder during drag |
 | `ChosenClass` | `string` | `"sortable-chosen"` | CSS class for the chosen element |
@@ -155,30 +193,30 @@ Add to your .csproj file:
 | `ForceFallback` | `bool` | `true` | If set to true, the fallback for non-HTML5 browsers will be used, even if an HTML5 browser is used |
 | `FallbackClass` | `string` | `"sortable-fallback"` | CSS class for the element in fallback mode |
 | `FallbackOnBody` | `bool` | `false` | Appends the cloned DOM element to the document body |
-| `FallbackTolerance` | `int` | `0` | Emulates the native drag threshold. Specify in pixels how far the mouse should move before it's considered as a drag. `3` to `5` are probably good values |
+| `FallbackTolerance` | `int` | `0` | Emulates the native drag threshold. Specify in pixels how far the mouse should move before it is considered a drag. Values between `3` and `5` are good |
 | `Scroll` | `bool` | `true` | Enables scrolling of the container during dragging |
 | `OnUpdate` | `Action<SortableEventArgs<TItem>>?` | `null` | Raised when the order of items is changed |
-| `OnAdd` | `Action<SortableEventArgs<TItem>>?` | `null` | Raised when an item is added to the list |
-| `OnRemove` | `Action<SortableEventArgs<TItem>>?` | `null` | Raised when an item is removed from the list |
+| `OnAdd` | `Action<SortableEventArgs<TItem>>?` | `null` | Raised when an item is accepted by the component |
+| `OnRemove` | `Action<SortableEventArgs<TItem>>?` | `null` | Raised when an item is removed from the component |
 
 ### SortablePullMode
 
 | Value | Description |
 |-------|-------------|
-| `True` | Allows pulling items from the list |
-| `False` | Prohibits pulling items from the list |
-| `Groups` | Allows pulling items only from specified groups (requires `PullGroups` parameter) |
+| `True` | Allows pulling items |
+| `False` | Prohibits pulling items |
+| `Groups` | Allows pulling items only into specified target groups (requires `PullGroups` parameter) |
 | `Clone` | Creates a clone of the item when dragging (requires `CloneFunction` parameter) |
-| `Function` | Uses a custom function to determine if items can be pulled (requires `PullFunction` parameter) |
+| `Function` | Uses a custom function to determine whether items can be pulled (requires `PullFunction` parameter) |
 
 ### SortablePutMode
 
 | Value | Description |
 |-------|-------------|
-| `True` | Allows adding items to the list |
-| `False` | Prohibits adding items to the list |
-| `Groups` | Allows adding items only from specified groups (requires `PutGroups` parameter) |
-| `Function` | Uses a custom function to determine if items can be added (requires `PutFunction` parameter) |
+| `True` | Allows accepting items |
+| `False` | Prohibits accepting items |
+| `Groups` | Allows accepting items only from specified source groups (requires `PutGroups` parameter) |
+| `Function` | Uses a custom function to determine whether items can be accepted (requires `PutFunction` parameter) |
 
 ## Events
 
@@ -219,15 +257,15 @@ The `ISortableInfo` interface provides information about a sortable component.
 
 ## Notes
 
-- **Order of events when dragging between lists:**
-    1. `OnAdd` is triggered **first** - during this event, the item is **still present in the source list**.
+- **Order of events when dragging between components:**
+    1. `OnAdd` is triggered **first** - during this event, the item is **still present in the source component**.
     2. `OnRemove` is triggered **after**.
 
 - **Events use `Action<T>?` instead of `EventCallback<T>`:**  
     `EventCallback<T>` uses the component event pipeline, which calls `StateHasChanged()` on the receiving `ComponentBase` after the handler runs. This causes conflicts between the DOM and the data model for this component.
 
 - **Type mismatch / failed conversion:**  
-    If item types don't match or the `ConvertFunction` returns `null`, the item is **not added** to the target list and **remains in its original position**.
+    If item types don't match or the `ConvertFunction` returns `null`, the item is **not accepted** by the target component and **remains in its original position**.
 
 - **Dragging issues on scrolled page:**  
     If the dragged element appears misaligned when the page is scrolled, set

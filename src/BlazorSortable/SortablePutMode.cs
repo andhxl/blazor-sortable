@@ -1,28 +1,28 @@
 namespace BlazorSortable;
 
 /// <summary>
-/// Defines the mode for adding items to the list during drag and drop operations.
+/// Defines how a Sortable component accepts items during drag-and-drop operations.
 /// </summary>
 public enum SortablePutMode
 {
     /// <summary>
-    /// Allows adding items to the list.
+    /// Allows accepting items.
     /// </summary>
     True,
 
     /// <summary>
-    /// Prohibits adding items to the list.
+    /// Prohibits accepting items.
     /// </summary>
     False,
 
     /// <summary>
-    /// Allows adding items only from specified groups.
+    /// Allows accepting items only from specified source groups.
     /// Requires setting the <see cref="Sortable{TItem}.PutGroups"/> parameter.
     /// </summary>
     Groups,
 
     /// <summary>
-    /// Uses a custom function to determine whether items can be added to the list.
+    /// Uses a custom function to determine whether items can be accepted.
     /// Requires setting the <see cref="Sortable{TItem}.PutFunction"/> parameter.
     /// </summary>
     Function

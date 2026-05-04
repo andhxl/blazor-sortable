@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BlazorSortable;
 
 /// <summary>
-/// Provides extension methods.
+/// Provides service registration extensions for BlazorSortable.
 /// </summary>
 public static class SortableExtensions
 {

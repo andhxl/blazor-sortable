@@ -1,6 +1,6 @@
-<ExampleComponent Id="@Id"
-                  Title="Drop zone"
-                  CodeContent="@codeContent">
+<ExampleSection Id="@Id"
+                Title="Drop zone"
+                CodeContent="@codeContent">
     <RadzenStack>
         <RadzenStack Orientation="Orientation.Horizontal">
             <Sortable TItem="ClassA"
@@ -28,38 +28,38 @@
                   PutGroups="@(["drop1", "drop2"])"
                   GhostClass="drop-zone-ghost" />
     </RadzenStack>
-</ExampleComponent>
+</ExampleSection>
 
 @code {
     [Parameter, EditorRequired]
     public string Id { get; set; }
 
     private string codeContent = @"
-<RadzenStack>
-    <RadzenStack Orientation=""Orientation.Horizontal"">
+<div class=""stack"">
+    <div class=""row"">
         <Sortable TItem=""ClassA""
                   Items=""Utils.CreateItemList<ClassA>(5)""
                   Class=""items-column""
                   Group=""drop1"">
-            <RadzenCard class=""item"">
+            <div class=""item"">
                 @context
-            </RadzenCard>
+            </div>
         </Sortable>
 
         <Sortable TItem=""ClassB""
                   Items=""Utils.CreateItemList<ClassB>(5)""
                   Class=""items-column""
                   Group=""drop2"">
-            <RadzenCard class=""item"">
+            <div class=""item"">
                 @context
-            </RadzenCard>
+            </div>
         </Sortable>
-    </RadzenStack>
+    </div>
 
     <Sortable TItem=""object""
               Class=""drop-zone""
               Put=""SortablePutMode.Groups""
               PutGroups=""@([""drop1"", ""drop2""])""
               GhostClass=""drop-zone-ghost"" />
-</RadzenStack>";
+</div>";
 }

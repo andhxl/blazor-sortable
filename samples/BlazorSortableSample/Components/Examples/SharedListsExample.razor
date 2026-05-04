@@ -1,6 +1,6 @@
-<ExampleComponent Id="@Id"
-                  Title="Shared lists"
-                  CodeContent="@codeContent">
+<ExampleSection Id="@Id"
+                Title="Shared lists"
+                CodeContent="@codeContent">
     <RadzenStack Orientation="Orientation.Horizontal">
         <Sortable TItem="ClassA"
                   Items="Utils.CreateItemList<ClassA>(5)"
@@ -20,30 +20,30 @@
             </RadzenCard>
         </Sortable>
     </RadzenStack>
-</ExampleComponent>
+</ExampleSection>
 
 @code {
     [Parameter, EditorRequired]
     public string Id { get; set; }
 
     private string codeContent = @"
-<RadzenStack Orientation=""Orientation.Horizontal"">
+<div class=""row"">
     <Sortable TItem=""ClassA""
               Items=""Utils.CreateItemList<ClassA>(5)""
               Class=""items-column""
               Group=""group1"">
-        <RadzenCard class=""item"">
+        <div class=""item"">
             @context
-        </RadzenCard>
+        </div>
     </Sortable>
 
     <Sortable TItem=""ClassA""
               Items=""Utils.CreateItemList<ClassA>(5, 6)""
               Class=""items-column""
               Group=""group1"">
-        <RadzenCard class=""item"">
+        <div class=""item"">
             @context
-        </RadzenCard>
+        </div>
     </Sortable>
-</RadzenStack>";
+</div>";
 }

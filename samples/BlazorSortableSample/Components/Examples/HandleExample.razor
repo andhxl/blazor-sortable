@@ -1,6 +1,6 @@
-<ExampleComponent Id="@Id"
-                  Title="Handle"
-                  CodeContent="@codeContent">
+<ExampleSection Id="@Id"
+                Title="Handle"
+                CodeContent="@codeContent">
     <Sortable TItem="ClassA"
               Items="Utils.CreateItemList<ClassA>(5)"
               Class="items-column"
@@ -13,7 +13,7 @@
             </RadzenStack>
         </RadzenCard>
     </Sortable>
-</ExampleComponent>
+</ExampleSection>
 
 @code {
     [Parameter, EditorRequired]
@@ -25,11 +25,9 @@
           Class=""items-column""
           Handle="".handle""
           ForceFallback=""false"">
-    <RadzenCard class=""item"">
-        <RadzenStack Orientation=""Orientation.Horizontal"" AlignItems=""AlignItems.Center"">
-            <div class=""handle"" />
-            @context
-        </RadzenStack>
-    </RadzenCard>
+    <div class=""item item-with-handle"">
+        <div class=""handle"" />
+        @context
+    </div>
 </Sortable>";
 }

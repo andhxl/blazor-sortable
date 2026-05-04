@@ -1,6 +1,6 @@
-<ExampleComponent Id="@Id"
-                  Title="Simple list"
-                  CodeContent="@codeContent">
+<ExampleSection Id="@Id"
+                Title="Simple list"
+                CodeContent="@codeContent">
     <Sortable Items="Utils.CreateItemList<ClassA>(5)"
               Class="items-column"
               Delay="150"
@@ -9,7 +9,7 @@
             @context
         </RadzenCard>
     </Sortable>
-</ExampleComponent>
+</ExampleSection>
 
 @code {
     [Parameter, EditorRequired]
@@ -20,8 +20,8 @@
           Class=""items-column""
           Delay=""150""
           DelayOnTouchOnly=""true"">
-    <RadzenCard class=""item"">
+    <div class=""item"">
         @context
-    </RadzenCard>
+    </div>
 </Sortable>";
 }

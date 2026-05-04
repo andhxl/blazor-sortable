@@ -1,4 +1,4 @@
-namespace BlazorSortableSample.Components;
+namespace BlazorSortableSample.Components.Examples.Data;
 
 public abstract class ClassBase
 {

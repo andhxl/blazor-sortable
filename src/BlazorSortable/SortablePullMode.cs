@@ -1,22 +1,22 @@
 namespace BlazorSortable;
 
 /// <summary>
-/// Defines the mode for pulling items from the list during drag and drop operations.
+/// Defines how items can be pulled from a Sortable component during drag-and-drop operations.
 /// </summary>
 public enum SortablePullMode
 {
     /// <summary>
-    /// Allows pulling items from the list.
+    /// Allows pulling items.
     /// </summary>
     True,
 
     /// <summary>
-    /// Prohibits pulling items from the list.
+    /// Prohibits pulling items.
     /// </summary>
     False,
 
     /// <summary>
-    /// Allows pulling items only from specified groups.
+    /// Allows pulling items only into specified target groups.
     /// Requires setting the <see cref="Sortable{TItem}.PullGroups"/> parameter.
     /// </summary>
     Groups,
@@ -28,7 +28,7 @@ public enum SortablePullMode
     Clone,
 
     /// <summary>
-    /// Uses a custom function to determine if an item can be pulled from the list.
+    /// Uses a custom function to determine whether items can be pulled.
     /// Requires setting the <see cref="Sortable{TItem}.PullFunction"/> parameter.
     /// </summary>
     Function

@@ -5,9 +5,9 @@ namespace BlazorSortable;
 /// </summary>
 /// <typeparam name="TItem">The type of the item.</typeparam>
 /// <param name="Item">The item participating in the operation.</param>
-/// <param name="From">Source sortable.</param>
+/// <param name="From">Source sortable component.</param>
 /// <param name="OldIndex">The previous index of the item in the source sortable.</param>
-/// <param name="To">Target sortable.</param>
+/// <param name="To">Target sortable component.</param>
 /// <param name="NewIndex">The new index of the item in the target sortable.</param>
 /// <param name="IsClone">Flag indicating whether the item is a clone.</param>
 public sealed record SortableEventArgs<TItem>(
@@ -16,4 +16,5 @@ public sealed record SortableEventArgs<TItem>(
     int OldIndex,
     ISortableInfo To,
     int NewIndex,
-    bool IsClone = false);
+    bool IsClone = false)
+    where TItem : notnull;

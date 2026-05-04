@@ -8,20 +8,24 @@ namespace BlazorSortable;
 // TODO: MultiDrag, Swap
 
 /// <summary>
-/// Component for creating sortable with drag and drop functionality.
+/// Component for sorting and transferring items with drag and drop.
 /// </summary>
-/// <typeparam name="TItem">Type of items in the list.</typeparam>
+/// <typeparam name="TItem">Type of items displayed, sorted, or accepted by the component.</typeparam>
 public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
+    where TItem : notnull
 {
     /// <summary>
-    /// List of items to display and sort.
+    /// Items to display and sort. If null, the component works as a drop zone.
     /// </summary>
     [Parameter]
     public IList<TItem>? Items { get; set; }
 
     /// <summary>
-    /// Template for displaying each list item.
+    /// Template for displaying each item. Can be a component, HTML elements, or any Razor markup.
     /// </summary>
+    /// <remarks>
+    /// Used only when <see cref="Items"/> is not null.
+    /// </remarks>
     [Parameter]
     public RenderFragment<TItem>? ChildContent { get; set; }
 
@@ -68,13 +72,13 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public string Group { get; set; } = Guid.NewGuid().ToString();
 
     /// <summary>
-    /// Mode for pulling items from the list.
+    /// Mode for pulling items from this Sortable component.
     /// </summary>
     [Parameter]
     public SortablePullMode? Pull { get; set; }
 
     /// <summary>
-    /// Array of group names from which items can be pulled.
+    /// Array of target group names into which items from this Sortable component can be dragged.
     /// </summary>
     /// <remarks>
     /// Used only when <see cref="Pull"/> is set to <see cref="SortablePullMode.Groups"/>.
@@ -83,7 +87,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public string[]? PullGroups { get; set; }
 
     /// <summary>
-    /// Factory function used to create a deep copy of an item when items are pulled in clone mode.
+    /// Factory method used to create a non-null clone of the dragged item.
     /// </summary>
     /// <remarks>
     /// Used only when <see cref="Pull"/> is set to <see cref="SortablePullMode.Clone"/>.
@@ -92,7 +96,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public Func<TItem, TItem>? CloneFunction { get; set; }
 
     /// <summary>
-    /// Function used to determine if an item can be pulled from this list to another list.
+    /// Function used to determine whether an item can be pulled to the target Sortable component.
     /// </summary>
     /// <remarks>
     /// Used only when <see cref="Pull"/> is set to <see cref="SortablePullMode.Function"/>.
@@ -107,13 +111,13 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public Predicate<SortableTransferContext<TItem>>? PullFunction { get; set; }
 
     /// <summary>
-    /// Mode for adding items to this Sortable component.
+    /// Mode for accepting items into this Sortable component.
     /// </summary>
     [Parameter]
     public SortablePutMode? Put { get; set; }
 
     /// <summary>
-    /// Array of group names from which items can be added.
+    /// Array of source group names from which this Sortable component can accept items.
     /// </summary>
     /// <remarks>
     /// Used only when <see cref="Put"/> is set to <see cref="SortablePutMode.Groups"/>.
@@ -122,7 +126,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public string[]? PutGroups { get; set; }
 
     /// <summary>
-    /// Custom function to determine whether an item can be added to this Sortable component.
+    /// Function used to determine whether an item can be accepted by this Sortable component.
     /// </summary>
     /// <remarks>
     /// Used only when <see cref="Put"/> is set to <see cref="SortablePutMode.Function"/>.
@@ -137,18 +141,17 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public Predicate<SortableTransferContext<object>>? PutFunction { get; set; }
 
     /// <summary>
-    /// Dictionary of converters for transforming items from other SortableLists.
+    /// Function used to convert items from another Sortable component to the target item type.
     /// </summary>
     /// <remarks>
-    /// The key is the <c>Id</c> of another <see cref="Sortable{TItem}"/> that provides items,
-    /// and the value is a function that converts an item from that list to the target <typeparamref name="TItem"/> type.
-    /// This is used when items are dragged between lists with different data types.
+    /// Use this when items are dragged between Sortable components with different item types.
+    /// Return <see langword="null"/> to reject the item.
     /// </remarks>
     [Parameter]
     public Func<SortableTransferContext<object>, TItem?>? ConvertFunction { get; set; }
 
     /// <summary>
-    /// Enables or disables sorting of items within the list.
+    /// Enables or disables sorting within this Sortable component.
     /// </summary>
     [Parameter]
     public bool Sort { get; set; } = true;
@@ -344,7 +347,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public bool Scroll { get; set; } = true;
 
     /// <summary>
-    /// Event that occurs when the order of items in the list is updated.
+    /// Event that occurs when the order of items is changed.
     /// </summary>
     /// <remarks>
     /// Uses <see cref="Action{T}"/> instead of <see cref="EventCallback{TValue}"/>
@@ -354,7 +357,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public Action<SortableEventArgs<TItem>>? OnUpdate { get; set; }
 
     /// <summary>
-    /// Event that occurs when an item is added to the list.
+    /// Event that occurs when an item is accepted by the component.
     /// </summary>
     /// <remarks>
     /// Uses <see cref="Action{T}"/> instead of <see cref="EventCallback{TValue}"/>
@@ -364,7 +367,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public Action<SortableEventArgs<TItem>>? OnAdd { get; set; }
 
     /// <summary>
-    /// Event that occurs when an item is removed from the list.
+    /// Event that occurs when an item is removed from the component.
     /// </summary>
     /// <remarks>
     /// Uses <see cref="Action{T}"/> instead of <see cref="EventCallback{TValue}"/>
@@ -436,7 +439,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             return;
 
         // Check WebAssembly-only options here because OnParametersSet can run during
-        // server prerendering, where InteractiveWebAssembly components are not in the browser yet
+        // server prerendering, where InteractiveWebAssembly components are not in the browser yet.
         if ((Pull == SortablePullMode.Function || Put == SortablePutMode.Function) &&
             !OperatingSystem.IsBrowser())
         {
@@ -538,7 +541,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
         options["scroll"] = Scroll;
 
-        // Possible bug in OnSpill: item might be removed from the list even if removeOnSpill is false and revertOnSpill is true
+        // Possible bug in OnSpill: item might be removed from the list even if removeOnSpill is false and revertOnSpill is true.
 
         return options;
     }
@@ -573,10 +576,11 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
     public bool OnPullJS(string toId)
     {
-        var item = Items![draggedItemIndex];
         var to = SortableRegistry[toId];
-        var ctx = new SortableTransferContext<TItem>(item, this, to);
-        return PullFunction!(ctx);
+        var item = Items![draggedItemIndex];
+
+        return PullFunction!(new SortableTransferContext<TItem>(
+            item, this, to));
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
@@ -584,8 +588,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     {
         var from = SortableRegistry[fromId];
         var item = from[from.DraggedItemIndex];
-        var ctx = new SortableTransferContext<object>(item, from, this);
-        return PutFunction!(ctx);
+
+        return PutFunction!(new SortableTransferContext<object>(
+            item, from, this));
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
@@ -601,11 +606,8 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         Items.Insert(newIndex, item);
         StateHasChanged();
 
-        if (OnUpdate is not null)
-        {
-            var args = new SortableEventArgs<TItem>(item, this, oldIndex, this, newIndex);
-            OnUpdate(args);
-        }
+        OnUpdate?.Invoke(new SortableEventArgs<TItem>(
+            item, this, oldIndex, this, newIndex));
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
@@ -616,16 +618,27 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
         var sourceObject = from[oldIndex];
 
-        var item = ConvertFunction is not null
-            ? ConvertFunction(new SortableTransferContext<object>(sourceObject, from, this))
-            : sourceObject is TItem sourceItem
-                ? sourceItem
-                : default;
+        TItem item;
+        if (ConvertFunction is not null)
+        {
+            var convertedItem = ConvertFunction(new SortableTransferContext<object>(
+                sourceObject, from, this));
 
-        if (item is null)
+            if (convertedItem is null)
+                return;
+
+            item = convertedItem;
+        }
+        else if (sourceObject is TItem sourceItem)
+        {
+            item = sourceItem;
+        }
+        else
+        {
             return;
+        }
 
-        // Drop zone mode: when Items is null, we still accept the drop event but do not store the item locally
+        // Drop zone mode: when Items is null, we still accept the drop event but do not store the item locally.
         if (Items is not null)
         {
             Items.Insert(newIndex, item);
@@ -634,11 +647,8 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
         from.SuppressNextRemove = false;
 
-        if (OnAdd is not null)
-        {
-            var args = new SortableEventArgs<TItem>(item, from, oldIndex, this, newIndex, isClone);
-            OnAdd(args);
-        }
+        OnAdd?.Invoke(new SortableEventArgs<TItem>(
+            item, from, oldIndex, this, newIndex, isClone));
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
@@ -656,12 +666,8 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         Items.RemoveAt(oldIndex);
         StateHasChanged();
 
-        if (OnRemove is not null)
-        {
-            var to = SortableRegistry[toId];
-            var args = new SortableEventArgs<TItem>(item, this, oldIndex, to, newIndex);
-            OnRemove(args);
-        }
+        OnRemove?.Invoke(new SortableEventArgs<TItem>(
+            item, this, oldIndex, SortableRegistry[toId], newIndex));
     }
 
     //[JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
@@ -676,9 +682,10 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     {
         get
         {
-            var item = Items![index]!;
+            var item = Items![index];
+
             return Pull == SortablePullMode.Clone
-                ? CloneFunction!(item)!
+                ? CloneFunction!(item)
                 : item;
         }
     }

@@ -10,4 +10,5 @@ namespace BlazorSortable;
 public sealed record SortableTransferContext<TItem>(
     TItem Item,
     ISortableInfo From,
-    ISortableInfo To);
+    ISortableInfo To)
+    where TItem : notnull;

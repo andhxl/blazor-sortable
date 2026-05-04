@@ -1,6 +1,6 @@
-<ExampleComponent Id="@Id"
-                  Title="Example"
-                  CodeContent="@codeContent">
+<ExampleSection Id="@Id"
+                Title="Advanced"
+                CodeContent="@codeContent">
     <RadzenStack Orientation="Orientation.Horizontal">
         <Sortable TItem="ClassA"
                   Items="Utils.CreateItemList<ClassA>(5)"
@@ -25,23 +25,23 @@
             </RadzenCard>
         </Sortable>
     </RadzenStack>
-</ExampleComponent>
+</ExampleSection>
 
 @code {
     [Parameter, EditorRequired]
     public string Id { get; set; }
 
     private string codeContent = @"
-<RadzenStack Orientation=""Orientation.Horizontal"">
+<div class=""row"">
     <Sortable TItem=""ClassA""
               Items=""Utils.CreateItemList<ClassA>(5)""
               Class=""items-column""
               Pull=""SortablePullMode.Clone""
               CloneFunction=""i => new() { Value = i.Value }""
               Sort=""false"">
-        <RadzenCard class=""item"">
+        <div class=""item"">
             @context
-        </RadzenCard>
+        </div>
     </Sortable>
 
     <Sortable TItem=""ClassB""
@@ -51,9 +51,9 @@
               PutFunction=""c => c.Item is ClassA i && i.Value < 4""
               ConvertFunction=""c => c.Item is ClassA i ? new() { Value = i.Value } : null""
               InvertSwap=""true"">
-        <RadzenCard class=""item"">
+        <div class=""item"">
             @context
-        </RadzenCard>
+        </div>
     </Sortable>
-</RadzenStack>";
+</div>";
 }
