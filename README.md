@@ -14,61 +14,78 @@ Inspired by [BlazorSortable](https://github.com/the-urlist/BlazorSortable) and r
 ### Via NuGet Package Manager
 
 ### Via .NET CLI
+
 ```bash
 dotnet add package BlazorSortable
 ```
 
 ### Via PackageReference
+
 Add to your .csproj file:
 ```xml
 <ItemGroup>
-  <PackageReference Include="BlazorSortable" Version="6.*" />
+  <PackageReference Include="BlazorSortable" Version="7.*" />
 </ItemGroup>
 ```
 
 ## Setup
 
 1. Add the SortableJS script to the host page of your app, before the closing `</body>` tag:
-    - `wwwroot/index.html` (for Blazor WebAssembly Standalone App)  
+    - `wwwroot/index.html` (for Blazor WebAssembly Standalone App)
     - `Components/App.razor` (for Blazor Web App)
 
     Use one of the following methods:
 
     a) **Via CDN:**
+
     ```html
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js"></script>
     ```
 
     b) **Locally:**
+
+    Download SortableJS 1.15.7 ([GitHub](https://github.com/SortableJS/Sortable/releases/tag/1.15.7)), create `wwwroot/lib/sortablejs/`, and place `Sortable.min.js` in that folder.
+
     ```html
     <script src="lib/sortablejs/Sortable.min.js"></script>
     ```
-    > You can optionally add a cache-busting query string (one of several cache-busting approaches):
+
+    > Caching behavior depends on your hosting setup and static file cache headers.
+    >
+    > For **.NET 9+ Blazor Web App**, you can use static asset fingerprinting from a Razor file:
+    > ```razor
+    > <script src="@Assets["lib/sortablejs/Sortable.min.js"]"></script>
+    > ```
+    >
+    > For **.NET 10+ Blazor WebAssembly Standalone Apps**, local scripts can use fingerprint placeholders when `OverrideHtmlAssetPlaceholders` is enabled:
+    > ```html
+    > <script src="lib/sortablejs/Sortable.min#[.{fingerprint}].js"></script>
+    > ```
+    >
+    > If needed, you can add a query string that matches the SortableJS version:
     > ```html
     > <script src="lib/sortablejs/Sortable.min.js?v=1.15.7"></script>
     > ```
 
-    For local installation:
-    1. Download the latest version of SortableJS ([GitHub](https://github.com/SortableJS/Sortable/releases))
-    2. Create the folder structure in `wwwroot`: `lib/sortablejs/`
-    3. Place the `Sortable.min.js` file in the created folder
-
 2. (Optional) Add base styles to the `<head>` element of the same host page:
     ```html
-    <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css" />
+    <link rel="stylesheet" href="_content/BlazorSortable/blazor-sortable.css" />
     ```
-    > You can also add a cache-busting query string (one of several cache-busting approaches):
-    > ```html
-    > <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css?v=6.0.2" />
-    > ```
-    > Or automatically use the current assembly version as the cache-busting value from a Razor file:
+
+    > For **.NET 9+ Blazor Web App**, you can use static asset fingerprinting from a Razor file:
     > ```razor
-    > <link rel="stylesheet" href="_content/BlazorSortable/css/blazor-sortable.css?v=@(typeof(BlazorSortable.Sortable<>).Assembly.GetName().Version)" />
+    > <link rel="stylesheet" href="@Assets["_content/BlazorSortable/blazor-sortable.css"]" />
     > ```
-    > For **Blazor WebAssembly Standalone App**, place this inside the `<HeadContent>` section of `App.razor` and make sure `Program.cs` contains:
-    > ```csharp
-    > builder.RootComponents.Add<HeadOutlet>("head::after");
+    >
+    > From a Razor file, you can also use the current BlazorSortable assembly version as a cache-busting query string:
+    > ```razor
+    > <link rel="stylesheet" href="_content/BlazorSortable/blazor-sortable.css?v=@(typeof(BlazorSortable.Sortable<>).Assembly.GetName().Version)" />
     > ```
+    >
+    >> For **Blazor WebAssembly Standalone App**, use the assembly-version query string inside the `<HeadContent>` section of `App.razor` and make sure `Program.cs` contains:
+    >> ```csharp
+    >> builder.RootComponents.Add<HeadOutlet>("head::after");
+    >> ```
 
 3. Add services in the `Program.cs` of the app where the component runs (`InteractiveWebAssembly` components require registration in the client app):
     ```csharp
@@ -173,7 +190,7 @@ Add to your .csproj file:
 | `Put` | `SortablePutMode?` | `null` | Mode for accepting items into this Sortable component |
 | `PutGroups` | `string[]?` | `null` | **Required when `Put="SortablePutMode.Groups"`.** Specifies the source groups from which this Sortable component can accept items |
 | `PutFunction` | `Predicate<SortableTransferContext<object>>?` | `null` | **Required when `Put="SortablePutMode.Function"`.** Function to determine whether an item can be accepted by this Sortable component. **Works only when the component runs on WebAssembly.** |
-| `ConvertFunction` | `Func<SortableTransferContext<object>, TItem?>?` | `null` | Function to convert items from another Sortable component to the target item type. Return `null` to reject the item |
+| `ConvertFunction` | `Func<SortableTransferContext<object>, TItem?>?` | `null` | Converts incoming items that are not assignable to the target item type. Return `null` when conversion is not possible |
 | `Sort` | `bool` | `true` | Enables or disables sorting within this Sortable component |
 | `Delay` | `int` | `0` | Time in milliseconds to define when sorting should start. Unfortunately, due to browser restrictions, delaying is not possible on IE or Edge with native drag and drop |
 | `DelayOnTouchOnly` | `bool` | `false` | Whether the delay should be applied only when the user is using touch, e.g. on a mobile device. No delay will be applied in any other case |
@@ -261,23 +278,29 @@ The `ISortableInfo` interface provides information about a sortable component.
     1. `OnAdd` is triggered **first** - during this event, the item is **still present in the source component**.
     2. `OnRemove` is triggered **after**.
 
-- **Events use `Action<T>?` instead of `EventCallback<T>`:**  
+- **Events use `Action<T>?` instead of `EventCallback<T>`:**
+
     `EventCallback<T>` uses the component event pipeline, which calls `StateHasChanged()` on the receiving `ComponentBase` after the handler runs. This causes conflicts between the DOM and the data model for this component.
 
-- **Type mismatch / failed conversion:**  
-    If item types don't match or the `ConvertFunction` returns `null`, the item is **not accepted** by the target component and **remains in its original position**.
+- **Type mismatch / failed conversion:**
 
-- **Dragging issues on scrolled page:**  
+    If the dragged item is assignable to the target item type, it is added as-is and `ConvertFunction` is not called.  
+    If the item is not assignable, `ConvertFunction` is used when provided.  
+    If no `ConvertFunction` is provided, or it returns `null`, the item is not accepted and remains in its original position.
+
+- **Dragging issues on scrolled page:**
+
     If the dragged element appears misaligned when the page is scrolled, set
     ```razor
     ForceFallback="false"
     ```
-    **or**
+    or
     ```razor
     FallbackOnBody="true"
     ```
 
-- **Server-side interactivity limitation:**  
+- **Server-side interactivity limitation:**
+
     `PullFunction` and `PutFunction` require synchronous JS-to-.NET calls used by SortableJS,
     which are only available when the component runs on WebAssembly.
     These options are not supported with server-side interactivity and will throw a `PlatformNotSupportedException`.
