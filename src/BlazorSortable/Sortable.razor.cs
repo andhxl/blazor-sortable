@@ -449,7 +449,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         }
 
         jsModule = await JS.InvokeAsync<IJSObjectReference>("import",
-            "./_content/BlazorSortable/js/blazor-sortable.js" + AssemblyVersionQuery.Value);
+            "./_content/BlazorSortable/blazor-sortable.js" + AssemblyVersionQuery.Value);
 
         selfReference = DotNetObjectReference.Create(this);
         await jsModule.InvokeVoidAsync("initSortable", Id, BuildOptions(), selfReference);
