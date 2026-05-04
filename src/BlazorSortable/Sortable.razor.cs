@@ -605,10 +605,16 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
         Items.RemoveAt(oldIndex);
         Items.Insert(newIndex, item);
-        StateHasChanged();
 
-        OnUpdate?.Invoke(new SortableEventArgs<TItem>(
-            item, this, oldIndex, this, newIndex));
+        try
+        {
+            OnUpdate?.Invoke(new SortableEventArgs<TItem>(
+                item, this, oldIndex, this, newIndex));
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
@@ -640,16 +646,19 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         }
 
         // Drop zone mode: when Items is null, we still accept the drop event but do not store the item locally.
-        if (Items is not null)
-        {
-            Items.Insert(newIndex, item);
-            StateHasChanged();
-        }
+        Items?.Insert(newIndex, item);
 
         from.SuppressNextRemove = false;
 
-        OnAdd?.Invoke(new SortableEventArgs<TItem>(
-            item, from, oldIndex, this, newIndex, isClone));
+        try
+        {
+            OnAdd?.Invoke(new SortableEventArgs<TItem>(
+                item, from, oldIndex, this, newIndex, isClone));
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
@@ -665,10 +674,16 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         var item = Items![oldIndex];
 
         Items.RemoveAt(oldIndex);
-        StateHasChanged();
 
-        OnRemove?.Invoke(new SortableEventArgs<TItem>(
-            item, this, oldIndex, SortableRegistry[toId], newIndex));
+        try
+        {
+            OnRemove?.Invoke(new SortableEventArgs<TItem>(
+                item, this, oldIndex, SortableRegistry[toId], newIndex));
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 
     //[JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
