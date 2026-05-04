@@ -57,7 +57,15 @@ Add to your .csproj file:
     > <script src="@Assets["lib/sortablejs/Sortable.min.js"]"></script>
     > ```
     >
-    > For **.NET 10+ Blazor WebAssembly Standalone Apps**, local scripts can use fingerprint placeholders when `OverrideHtmlAssetPlaceholders` is enabled:
+    > For **.NET 10+ Blazor WebAssembly Standalone Apps**, configure the app `.csproj` and use a fingerprint placeholder:
+    > ```xml
+    > <PropertyGroup>
+    >   <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
+    > </PropertyGroup>
+    > <ItemGroup>
+    >   <StaticWebAssetFingerprintPattern Include="JS" Pattern="*.js" Expression="#[.{fingerprint}]!" />
+    > </ItemGroup>
+    > ```
     > ```html
     > <script src="lib/sortablejs/Sortable.min#[.{fingerprint}].js"></script>
     > ```
