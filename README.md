@@ -255,9 +255,9 @@ The `SortableEventArgs<TItem>` class provides information about sorting operatio
 | Property | Type | Description |
 |----------|------|-------------|
 | `Item` | `TItem` | The item participating in the operation |
-| `From` | `ISortableInfo` | Source sortable component |
+| `From` | `ISortableInfo` | Source sortable information |
 | `OldIndex` | `int` | The previous index of the item in the source sortable |
-| `To` | `ISortableInfo` | Target sortable component |
+| `To` | `ISortableInfo` | Target sortable information |
 | `NewIndex` | `int` | The new index of the item in the target sortable |
 | `IsClone` | `bool` | Flag indicating whether the item is a clone |
 
@@ -268,16 +268,16 @@ The `SortableTransferContext<TItem>` class represents the context of transferrin
 | Property | Type | Description |
 |----------|------|-------------|
 | `Item` | `TItem` | The item being transferred between sortable components |
-| `From` | `ISortableInfo` | The source sortable component |
-| `To` | `ISortableInfo` | The target sortable component |
+| `From` | `ISortableInfo` | The source sortable information |
+| `To` | `ISortableInfo` | The target sortable information |
 
 ### ISortableInfo
 
-The `ISortableInfo` interface provides information about a sortable component.
+The `ISortableInfo` interface provides sortable identity information.
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `Id` | `string` | Unique identifier of the component |
+| `Id` | `string` | Unique identifier of the Sortable component |
 | `Group` | `string` | Group name for interaction with other Sortable components |
 
 ## Notes

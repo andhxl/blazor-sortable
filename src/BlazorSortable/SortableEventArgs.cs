@@ -1,15 +1,15 @@
 namespace BlazorSortable;
 
 /// <summary>
-/// Represents event arguments for operations in Sortable components.
+/// Represents event arguments for a sortable operation.
 /// </summary>
 /// <typeparam name="TItem">The type of the item.</typeparam>
 /// <param name="Item">The item participating in the operation.</param>
-/// <param name="From">Source sortable component.</param>
+/// <param name="From">Source sortable information.</param>
 /// <param name="OldIndex">The previous index of the item in the source sortable.</param>
-/// <param name="To">Target sortable component.</param>
+/// <param name="To">Target sortable information.</param>
 /// <param name="NewIndex">The new index of the item in the target sortable.</param>
-/// <param name="IsClone">Flag indicating whether the item is a clone.</param>
+/// <param name="IsClone">Indicates whether the item is a clone.</param>
 public sealed record SortableEventArgs<TItem>(
     TItem Item,
     ISortableInfo From,

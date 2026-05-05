@@ -1,15 +1,12 @@
 namespace BlazorSortable;
 
 /// <summary>
-/// Provides information about a sortable component.
+/// Provides identifying information about a Sortable component.
 /// </summary>
-/// <remarks>
-/// This interface defines the basic properties that identify and categorize a sortable component.
-/// </remarks>
 public interface ISortableInfo
 {
     /// <summary>
-    /// Unique identifier of the component.
+    /// Unique identifier of the Sortable component.
     /// </summary>
     string Id { get; }
 
