@@ -2,7 +2,7 @@
                 Title="Handle"
                 CodeContent="@codeContent">
     <Sortable TItem="ClassA"
-              Items="Utils.CreateItemList<ClassA>(5)"
+              Items="classAItems"
               Class="items-column"
               Handle=".handle"
               ForceFallback="false">
@@ -19,9 +19,11 @@
     [Parameter, EditorRequired]
     public string Id { get; set; }
 
+    private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
+
     private string codeContent = @"
 <Sortable TItem=""ClassA""
-          Items=""Utils.CreateItemList<ClassA>(5)""
+          Items=""classAItems""
           Class=""items-column""
           Handle="".handle""
           ForceFallback=""false"">

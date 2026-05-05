@@ -4,7 +4,7 @@
     <RadzenStack>
         <RadzenStack Orientation="Orientation.Horizontal">
             <Sortable TItem="ClassA"
-                      Items="Utils.CreateItemList<ClassA>(5)"
+                      Items="classAItems"
                       Class="items-column"
                       Group="drop1">
                 <RadzenCard class="item">
@@ -13,7 +13,7 @@
             </Sortable>
 
             <Sortable TItem="ClassB"
-                      Items="Utils.CreateItemList<ClassB>(5)"
+                      Items="classBItems"
                       Class="items-column"
                       Group="drop2">
                 <RadzenCard class="item">
@@ -34,11 +34,14 @@
     [Parameter, EditorRequired]
     public string Id { get; set; }
 
+    private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
+    private readonly IList<ClassB> classBItems = Utils.CreateItemList<ClassB>(5);
+
     private string codeContent = @"
 <div class=""stack"">
     <div class=""row"">
         <Sortable TItem=""ClassA""
-                  Items=""Utils.CreateItemList<ClassA>(5)""
+                  Items=""classAItems""
                   Class=""items-column""
                   Group=""drop1"">
             <div class=""item"">
@@ -47,7 +50,7 @@
         </Sortable>
 
         <Sortable TItem=""ClassB""
-                  Items=""Utils.CreateItemList<ClassB>(5)""
+                  Items=""classBItems""
                   Class=""items-column""
                   Group=""drop2"">
             <div class=""item"">
