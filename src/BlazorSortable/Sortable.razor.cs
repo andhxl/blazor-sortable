@@ -1,5 +1,6 @@
 using BlazorSortable.Internal;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
 using System.ComponentModel;
 
@@ -397,8 +398,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     //[Parameter]
     //public Action<TItem>? OnDeselect { get; set; }
 
-    [Inject] private SortableRegistry SortableRegistry { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
+    [Inject] private SortableRegistry SortableRegistry { get; set; } = default!;
+    [Inject] private IOptions<SortableOptions> Options { get; set; } = default!;
 
     private IJSObjectReference? jsModule;
     private DotNetObjectReference<Sortable<TItem>>? selfReference;
@@ -449,10 +451,16 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         }
 
         jsModule = await JS.InvokeAsync<IJSObjectReference>("import",
-            "./_content/BlazorSortable/blazor-sortable.js" + AssemblyVersionQuery.Value);
+            "./_content/BlazorSortable/Sortable.razor.js" + AssemblyVersionQuery.Value);
 
         selfReference = DotNetObjectReference.Create(this);
-        await jsModule.InvokeVoidAsync("initSortable", Id, BuildOptions(), selfReference);
+
+        await jsModule.InvokeVoidAsync("initSortable",
+            Id,
+            BuildOptions(),
+            selfReference,
+            Options.Value.LoadStylesheet,
+            AssemblyVersionQuery.Value);
 
         SortableRegistry.Register(Id, this);
     }
