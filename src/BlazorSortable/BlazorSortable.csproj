@@ -8,13 +8,13 @@
     <GeneratePackageOnBuild Condition="$(Configuration) == 'Release'">true</GeneratePackageOnBuild>
     <Version>7.0.0</Version>
     <Authors>andhxl</Authors>
-    <Description>A Blazor component that wraps SortableJS, a library for drag-and-drop sorting.</Description>
+    <Description>A Blazor component that wraps SortableJS, a JavaScript library for reorderable drag-and-drop lists.</Description>
     <Copyright>© $([System.DateTime]::Now.Year) $(Authors)</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://andhxl.github.io/blazor-sortable/</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>blazor;components;ui;sortable;sortablejs;drag-and-drop;drag-drop;dragndrop;dragdrop;reorder</PackageTags>
+    <PackageTags>blazor;sortablejs;sortable;reorder;drag;drag-and-drop</PackageTags>
     <PackageReleaseNotes>Breaking changes: ConvertFunction behavior changed and static asset paths changed. See CHANGELOG.md for migration details.</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/andhxl/blazor-sortable</RepositoryUrl>
   </PropertyGroup>
