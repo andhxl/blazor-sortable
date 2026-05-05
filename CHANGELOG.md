@@ -9,9 +9,9 @@
 
 ### Fixes
 
-- Moved the component's internal `StateHasChanged()` call after `OnUpdate`, `OnAdd`, and `OnRemove`, so item changes made inside handlers are reflected immediately after the drag operation.
+- Moved the component's internal `StateHasChanged()` call to run after `OnUpdate`, `OnAdd`, and `OnRemove`, so the component no longer renders an intermediate state before user handlers finish.
 
-### Migration From 6.x
+### Migration
 
 #### ConvertFunction
 

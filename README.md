@@ -182,8 +182,8 @@ Add to your .csproj file:
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `TItem` | `notnull` | - | Type of items displayed, sorted, or accepted by the component |
-| `Items` | `IList<TItem>?` | `null` | Items to display and sort. If `null`, the component works as a drop zone |
-| `ChildContent` | `RenderFragment<TItem>?` | `null` | Template for displaying each item. Can be a component, HTML elements, or any Razor markup. Ignored when `Items` is `null` |
+| `Items` | `IList<TItem>?` | `null` | Optional backing list for items displayed, sorted, or accepted by the component. When `null`, accepted drops are reported through events but not stored locally |
+| `ChildContent` | `RenderFragment<TItem>?` | `null` | Template for rendering each item from `Items`. If omitted, the component does not render items. When `Items` is provided, accepted drops are still stored in that list |
 | `Context` | `string` | `context` | Razor template context name used by `ChildContent` to refer to the current item |
 | `KeySelector` | `Func<TItem, object>?` | `null` | Function for generating the key used in `@key`. If not set, the item itself is used |
 | `Class` | `string?` | `null` | CSS class for the container |

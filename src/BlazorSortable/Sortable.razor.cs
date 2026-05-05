@@ -645,7 +645,6 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             return;
         }
 
-        // Drop zone mode: when Items is null, we still accept the drop event but do not store the item locally.
         Items?.Insert(newIndex, item);
 
         from.SuppressNextRemove = false;
