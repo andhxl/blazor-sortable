@@ -100,6 +100,7 @@ dotnet_diagnostic.IDE0005.severity = warning
 dotnet_diagnostic.IDE0040.severity = warning
 dotnet_diagnostic.IDE0044.severity = warning
 dotnet_diagnostic.IDE0060.severity = warning
+dotnet_diagnostic.IDE0305.severity = none
 
 #### .NET Coding Conventions ####
 
@@ -137,7 +138,7 @@ dotnet_style_null_propagation = true
 dotnet_style_object_initializer = true
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
 dotnet_style_prefer_auto_properties = true
-dotnet_style_prefer_collection_expression = when_types_loosely_match
+dotnet_style_prefer_collection_expression = when_types_exactly_match
 dotnet_style_prefer_compound_assignment = true
 dotnet_style_prefer_conditional_expression_over_assignment = true
 dotnet_style_prefer_conditional_expression_over_return = true
