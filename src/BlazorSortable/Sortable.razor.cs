@@ -593,7 +593,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         var item = Items![draggedItemIndex];
 
         return PullFunction!(new SortableTransferContext<TItem>(
-            item, this, to));
+            item, CreateInfo(this), CreateInfo(to)));
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
@@ -603,7 +603,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         var item = from.GetTransferItem(from.DraggedItemIndex);
 
         return PutFunction!(new SortableTransferContext<object>(
-            item, from, this));
+            item, CreateInfo(from), CreateInfo(this)));
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
@@ -620,8 +620,13 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
         try
         {
-            OnUpdate?.Invoke(new SortableEventArgs<TItem>(
-                item, this, oldIndex, this, newIndex));
+            if (OnUpdate is not null)
+            {
+                var info = CreateInfo(this);
+
+                OnUpdate(new SortableEventArgs<TItem>(
+                    item, info, oldIndex, info, newIndex));
+            }
         }
         finally
         {
@@ -645,7 +650,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         else if (ConvertFunction is not null)
         {
             var convertedItem = ConvertFunction(new SortableTransferContext<object>(
-                sourceObject, from, this));
+                sourceObject, CreateInfo(from), CreateInfo(this)));
 
             if (convertedItem is null)
                 return;
@@ -664,7 +669,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         try
         {
             OnAdd?.Invoke(new SortableEventArgs<TItem>(
-                item, from, oldIndex, this, newIndex, isClone));
+                item, CreateInfo(from), oldIndex, CreateInfo(this), newIndex, isClone));
         }
         finally
         {
@@ -689,7 +694,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         try
         {
             OnRemove?.Invoke(new SortableEventArgs<TItem>(
-                item, this, oldIndex, SortableRegistry[toId], newIndex));
+                item, CreateInfo(this), oldIndex, CreateInfo(SortableRegistry[toId]), newIndex));
         }
         finally
         {
@@ -721,4 +726,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         get => shouldSkipNextRemove;
         set => shouldSkipNextRemove = value;
     }
+
+    private static SortableInfo CreateInfo(ISortableInfo sortable) =>
+        new(sortable.Id, sortable.Group);
 }
