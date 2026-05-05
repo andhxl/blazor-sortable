@@ -1,40 +1,92 @@
-const stylesheetPath = "_content/BlazorSortable/blazor-sortable.css";
-let stylesheetLoaded = false;
+const sortableJsPath = "_content/BlazorSortable/Sortable.min.js";
+const sortableJsVersion = "1.15.7";
 
-export function initSortable(id, options, component, loadStylesheet, versionQuery) {
+/** @type {Promise<void> | null} */
+let sortableJsLoadPromise = null;
+
+const stylesheetPath = "_content/BlazorSortable/blazor-sortable.css";
+let stylesheetInjected = false;
+
+export async function initSortable(id, options, component, assetOptions) {
     const el = document.getElementById(id);
     if (!el) {
         return;
     }
 
-    if (loadStylesheet) {
-        ensureStylesheet(versionQuery);
+    if (assetOptions.loadSortableJs) {
+        await ensureSortableJs();
+    } else {
+        ensureSortableJsAvailable();
     }
 
-    configureGroupCallbacks(options, component);
+    if (assetOptions.loadStylesheet) {
+        ensureStylesheet(assetOptions.versionQuery);
+    }
 
-    el._sortable = new Sortable(el, buildSortableOptions(options, component));
+    configureGroupCallbacks(options.group, component);
+
+    el.blazorSortable = globalThis.Sortable.create(el, buildSortableOptions(options, component));
 }
 
 export function destroySortable(id) {
     const el = document.getElementById(id);
-    if (!el?._sortable) {
+    if (!el?.blazorSortable) {
         return;
     }
 
-    el._sortable.destroy();
-    delete el._sortable;
+    el.blazorSortable.destroy();
+    delete el.blazorSortable;
+}
+
+async function ensureSortableJs() {
+    if (isSortableJsAvailable()) {
+        return;
+    }
+
+    sortableJsLoadPromise ??= loadSortableJs(`${sortableJsPath}?v=${sortableJsVersion}`);
+    await sortableJsLoadPromise;
+
+    ensureSortableJsAvailable();
+}
+
+function loadSortableJs(src) {
+    return new Promise((resolve, reject) => {
+        const sortableJs = document.createElement("script");
+        sortableJs.src = src;
+        sortableJs.onload = () => resolve();
+        sortableJs.onerror = () => {
+            sortableJs.remove();
+            sortableJsLoadPromise = null;
+            reject(new Error(`Failed to load SortableJS from '${src}'.`));
+        };
+
+        document.body.appendChild(sortableJs);
+    });
+}
+
+function ensureSortableJsAvailable() {
+    if (isSortableJsAvailable()) {
+        return;
+    }
+
+    throw new Error(
+        "SortableJS is not loaded. Add SortableJS before BlazorSortable initializes, or enable SortableOptions.LoadSortableJs."
+    );
+}
+
+function isSortableJsAvailable() {
+    return typeof globalThis.Sortable === "function";
 }
 
 function ensureStylesheet(versionQuery) {
-    if (stylesheetLoaded) {
+    if (stylesheetInjected) {
         return;
     }
 
-    const stylesheets = getStylesheets();
+    const stylesheetLinks = getHeadStylesheetLinks();
 
-    if (stylesheets.some(link => link.href.includes(stylesheetPath))) {
-        stylesheetLoaded = true;
+    if (stylesheetLinks.some(link => link.href.includes(stylesheetPath))) {
+        stylesheetInjected = true;
         return;
     }
 
@@ -42,31 +94,31 @@ function ensureStylesheet(versionQuery) {
     link.rel = "stylesheet";
     link.href = stylesheetPath + versionQuery;
 
-    insertStylesheet(stylesheets, link);
-    stylesheetLoaded = true;
+    insertHeadStylesheetLink(stylesheetLinks, link);
+    stylesheetInjected = true;
 }
 
-function getStylesheets() {
+function getHeadStylesheetLinks() {
     return Array.from(document.head.querySelectorAll('link[rel="stylesheet"]'));
 }
 
-function insertStylesheet(stylesheets, link) {
-    const lastStylesheet = stylesheets[stylesheets.length - 1];
+function insertHeadStylesheetLink(stylesheetLinks, link) {
+    const lastStylesheetLink = stylesheetLinks[stylesheetLinks.length - 1];
 
-    if (lastStylesheet) {
-        lastStylesheet.after(link);
+    if (lastStylesheetLink) {
+        lastStylesheetLink.after(link);
     } else {
         document.head.appendChild(link);
     }
 }
 
-function configureGroupCallbacks(options, component) {
-    if (options.group.pull === "function") {
-        options.group.pull = (to) => component.invokeMethod("OnPullJS", to.el.id);
+function configureGroupCallbacks(group, component) {
+    if (group.pull === "function") {
+        group.pull = (to) => component.invokeMethod("OnPullJs", to.el.id);
     }
 
-    if (options.group.put === "function") {
-        options.group.put = (_to, from) => component.invokeMethod("OnPutJS", from.el.id);
+    if (group.put === "function") {
+        group.put = (_to, from) => component.invokeMethod("OnPutJs", from.el.id);
     }
 }
 
@@ -74,32 +126,43 @@ function buildSortableOptions(options, component) {
     return {
         ...options,
         onStart: (evt) => {
-            component.invokeMethodAsync("OnStartJS", evt.oldIndex);
+            component.invokeMethodAsync("OnStartJs", evt.oldIndex);
         },
         onEnd: () => {
-            component.invokeMethodAsync("OnEndJS");
+            component.invokeMethodAsync("OnEndJs");
         },
         onUpdate: (evt) => {
             revertDomMove(evt);
 
-            component.invokeMethodAsync("OnUpdateJS", evt.oldIndex, evt.newIndex);
+            component.invokeMethodAsync("OnUpdateJs", evt.oldIndex, evt.newIndex);
         },
         onAdd: (evt) => {
-            component.invokeMethodAsync("OnAddJS", evt.from.id, evt.oldIndex, evt.newIndex, evt.pullMode === "clone");
+            revertDomMove(evt);
+
+            const isClone = isCloneMode(evt);
+
+            if (isClone) {
+                evt.clone.remove();
+            }
+
+            component.invokeMethodAsync("OnAddJs", evt.from.id, evt.oldIndex, evt.newIndex, isClone);
         },
         onRemove: (evt) => {
             revertDomMove(evt);
 
-            if (evt.pullMode === "clone") {
-                evt.clone?.remove();
+            if (isCloneMode(evt)) {
+                evt.clone.remove();
             } else {
-                component.invokeMethodAsync("OnRemoveJS", evt.oldIndex, evt.to.id, evt.newIndex);
+                component.invokeMethodAsync("OnRemoveJs", evt.oldIndex, evt.to.id, evt.newIndex);
             }
         }
     };
 }
 
 function revertDomMove(evt) {
-    evt.item.remove();
-    evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex]);
+    evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] ?? null);
+}
+
+function isCloneMode(evt) {
+    return evt.pullMode === "clone";
 }

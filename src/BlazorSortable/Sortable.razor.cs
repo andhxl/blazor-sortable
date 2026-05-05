@@ -1,8 +1,8 @@
+using System.ComponentModel;
 using BlazorSortable.Internal;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
-using System.ComponentModel;
 
 namespace BlazorSortable;
 
@@ -398,7 +398,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     //[Parameter]
     //public Action<TItem>? OnDeselect { get; set; }
 
-    [Inject] private IJSRuntime JS { get; set; } = default!;
+    [Inject] private IJSRuntime JsRuntime { get; set; } = default!;
     [Inject] private SortableRegistry SortableRegistry { get; set; } = default!;
     [Inject] private IOptions<SortableOptions> Options { get; set; } = default!;
 
@@ -450,17 +450,21 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 $"{nameof(PullFunction)} and {nameof(PutFunction)} are only supported when the component runs on WebAssembly.");
         }
 
-        jsModule = await JS.InvokeAsync<IJSObjectReference>("import",
+        jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import",
             "./_content/BlazorSortable/Sortable.razor.js" + AssemblyVersionQuery.Value);
 
         selfReference = DotNetObjectReference.Create(this);
 
         await jsModule.InvokeVoidAsync("initSortable",
             Id,
-            BuildOptions(),
+            BuildSortableOptions(),
             selfReference,
-            Options.Value.LoadStylesheet,
-            AssemblyVersionQuery.Value);
+            new
+            {
+                loadSortableJs = Options.Value.LoadSortableJs,
+                loadStylesheet = Options.Value.LoadStylesheet,
+                versionQuery = AssemblyVersionQuery.Value
+            });
 
         SortableRegistry.Register(Id, this);
     }
@@ -481,13 +485,13 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             }
         }
 
-        // Dispose selfReference after JS module
+        // Dispose selfReference after jsModule
         selfReference?.Dispose();
 
         SortableRegistry.Unregister(Id);
     }
 
-    private Dictionary<string, object> BuildOptions()
+    private Dictionary<string, object> BuildSortableOptions()
     {
         var group = new Dictionary<string, object>
         {
@@ -577,13 +581,13 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnStartJS(int index) => draggedItemIndex = index;
+    public void OnStartJs(int index) => draggedItemIndex = index;
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnEndJS() => draggedItemIndex = -1;
+    public void OnEndJs() => draggedItemIndex = -1;
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public bool OnPullJS(string toId)
+    public bool OnPullJs(string toId)
     {
         var to = SortableRegistry[toId];
         var item = Items![draggedItemIndex];
@@ -593,7 +597,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public bool OnPutJS(string fromId)
+    public bool OnPutJs(string fromId)
     {
         var from = SortableRegistry[fromId];
         var item = from[from.DraggedItemIndex];
@@ -603,7 +607,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnUpdateJS(int oldIndex, int newIndex)
+    public void OnUpdateJs(int oldIndex, int newIndex)
     {
         var item = Items![oldIndex];
 
@@ -626,7 +630,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnAddJS(string fromId, int oldIndex, int newIndex, bool isClone)
+    public void OnAddJs(string fromId, int oldIndex, int newIndex, bool isClone)
     {
         var from = SortableRegistry[fromId];
         from.SuppressNextRemove = !isClone;
@@ -669,7 +673,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnRemoveJS(int oldIndex, string toId, int newIndex)
+    public void OnRemoveJs(int oldIndex, string toId, int newIndex)
     {
         if (suppressNextRemove)
         {
@@ -694,10 +698,10 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     }
 
     //[JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    //public void OnSelectJS(int index) => OnSelect?.Invoke(Items![index]);
+    //public void OnSelectJs(int index) => OnSelect?.Invoke(Items![index]);
 
     //[JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    //public void OnDeselectJS(int index) => OnDeselect?.Invoke(Items![index]);
+    //public void OnDeselectJs(int index) => OnDeselect?.Invoke(Items![index]);
 
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
