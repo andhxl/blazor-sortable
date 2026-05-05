@@ -160,7 +160,14 @@ function buildSortableOptions(options, component) {
 }
 
 function revertDomMove(evt) {
-    evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] ?? null);
+    const item = evt.item;
+    const from = evt.from;
+    const oldIndex = evt.oldIndex;
+
+    item.remove();
+
+    const referenceItem = from.children[oldIndex] ?? null;
+    from.insertBefore(item, referenceItem);
 }
 
 function isCloneMode(evt) {
