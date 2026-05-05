@@ -1,9 +1,9 @@
-namespace BlazorSortable;
+namespace BlazorSortable.Internal;
 
 /// <summary>
 /// Provides identifying information about a Sortable component.
 /// </summary>
-public interface ISortableInfo
+internal interface ISortableInfo
 {
     /// <summary>
     /// Unique identifier of the Sortable component.

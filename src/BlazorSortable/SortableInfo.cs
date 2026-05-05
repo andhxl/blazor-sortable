@@ -8,4 +8,4 @@ namespace BlazorSortable;
 /// <remarks>
 /// Represents a snapshot of the component identity and does not expose the component instance.
 /// </remarks>
-public sealed record SortableInfo(string Id, string Group) : ISortableInfo;
+public sealed record SortableInfo(string Id, string Group);

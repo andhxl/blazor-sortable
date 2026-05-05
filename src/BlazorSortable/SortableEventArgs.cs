@@ -12,9 +12,9 @@ namespace BlazorSortable;
 /// <param name="IsClone">Indicates whether the item is a clone.</param>
 public sealed record SortableEventArgs<TItem>(
     TItem Item,
-    ISortableInfo From,
+    SortableInfo From,
     int OldIndex,
-    ISortableInfo To,
+    SortableInfo To,
     int NewIndex,
     bool IsClone = false)
     where TItem : notnull;

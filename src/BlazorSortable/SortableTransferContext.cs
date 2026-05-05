@@ -9,6 +9,6 @@ namespace BlazorSortable;
 /// <param name="To">Target sortable information.</param>
 public sealed record SortableTransferContext<TItem>(
     TItem Item,
-    ISortableInfo From,
-    ISortableInfo To)
+    SortableInfo From,
+    SortableInfo To)
     where TItem : notnull;
