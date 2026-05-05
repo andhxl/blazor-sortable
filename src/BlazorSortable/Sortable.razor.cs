@@ -406,7 +406,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     private DotNetObjectReference<Sortable<TItem>>? selfReference;
 
     private int draggedItemIndex = -1;
-    private bool suppressNextRemove;
+    private bool shouldSkipNextRemove;
 
     /// <inheritdoc/>
     protected override void OnParametersSet()
@@ -600,7 +600,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public bool OnPutJs(string fromId)
     {
         var from = SortableRegistry[fromId];
-        var item = from[from.DraggedItemIndex];
+        var item = from.GetTransferItem(from.DraggedItemIndex);
 
         return PutFunction!(new SortableTransferContext<object>(
             item, from, this));
@@ -633,9 +633,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public void OnAddJs(string fromId, int oldIndex, int newIndex, bool isClone)
     {
         var from = SortableRegistry[fromId];
-        from.SuppressNextRemove = !isClone;
+        from.ShouldSkipNextRemove = !isClone;
 
-        var sourceObject = from[oldIndex];
+        var sourceObject = from.GetTransferItem(oldIndex);
 
         TItem item;
         if (sourceObject is TItem sourceItem)
@@ -659,7 +659,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
         Items?.Insert(newIndex, item);
 
-        from.SuppressNextRemove = false;
+        from.ShouldSkipNextRemove = false;
 
         try
         {
@@ -675,9 +675,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
     public void OnRemoveJs(int oldIndex, string toId, int newIndex)
     {
-        if (suppressNextRemove)
+        if (shouldSkipNextRemove)
         {
-            suppressNextRemove = false;
+            shouldSkipNextRemove = false;
             return;
         }
 
@@ -705,23 +705,20 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
-    object ISortableList.this[int index]
+    object ISortableList.GetTransferItem(int index)
     {
-        get
-        {
-            var item = Items![index];
+        var item = Items![index];
 
-            return Pull == SortablePullMode.Clone
-                ? CloneFunction!(item)
-                : item;
-        }
+        return Pull == SortablePullMode.Clone
+            ? CloneFunction!(item)
+            : item;
     }
 
     int ISortableList.DraggedItemIndex => draggedItemIndex;
 
-    bool ISortableList.SuppressNextRemove
+    bool ISortableList.ShouldSkipNextRemove
     {
-        get => suppressNextRemove;
-        set => suppressNextRemove = value;
+        get => shouldSkipNextRemove;
+        set => shouldSkipNextRemove = value;
     }
 }
