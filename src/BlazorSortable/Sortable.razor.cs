@@ -429,8 +429,8 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             selfReference,
             new
             {
-                loadSortableJs = Options.Value.LoadSortableJs,
-                loadStylesheet = Options.Value.LoadStylesheet,
+                autoLoadSortableJs = Options.Value.AutoLoadSortableJs,
+                autoLoadStylesheet = Options.Value.AutoLoadStylesheet,
                 versionQuery = AssemblyVersionQuery.Value
             });
 

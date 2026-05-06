@@ -13,13 +13,13 @@ export async function initSortable(id, options, component, assetOptions) {
         return;
     }
 
-    if (assetOptions.loadSortableJs) {
+    if (assetOptions.autoLoadSortableJs) {
         await ensureSortableJs();
     } else {
         ensureSortableJsAvailable();
     }
 
-    if (assetOptions.loadStylesheet) {
+    if (assetOptions.autoLoadStylesheet) {
         ensureStylesheet(assetOptions.versionQuery);
     }
 
