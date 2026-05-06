@@ -13,6 +13,8 @@ Inspired by [BlazorSortable](https://github.com/the-urlist/BlazorSortable) and r
 
 ### Via NuGet Package Manager
 
+Search for BlazorSortable in NuGet Package Manager.
+
 ### Via .NET CLI
 
 ```bash
@@ -24,78 +26,14 @@ dotnet add package BlazorSortable
 Add to your .csproj file:
 ```xml
 <ItemGroup>
-  <PackageReference Include="BlazorSortable" Version="7.*" />
+  <PackageReference Include="BlazorSortable" Version="8.*" />
 </ItemGroup>
 ```
 
 ## Setup
 
-1. Add the SortableJS script to the host page of your app, before the closing `</body>` tag:
-    - `wwwroot/index.html` (for Blazor WebAssembly Standalone App)
-    - `Components/App.razor` (for Blazor Web App)
+1. Add BlazorSortable services in the `Program.cs` file of the app where the component runs (`InteractiveWebAssembly` components require registration in the client app):
 
-    Use one of the following methods:
-
-    a) **Via CDN:**
-
-    ```html
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js"></script>
-    ```
-
-    b) **Locally:**
-
-    Download SortableJS 1.15.7 ([GitHub](https://github.com/SortableJS/Sortable/releases/tag/1.15.7)), create `wwwroot/lib/sortablejs/`, and place `Sortable.min.js` in that folder.
-
-    ```html
-    <script src="lib/sortablejs/Sortable.min.js"></script>
-    ```
-
-    > Caching behavior depends on your hosting setup and static file cache headers.
-    >
-    > For **.NET 9+ Blazor Web App**, you can use static asset fingerprinting from a Razor file:
-    > ```razor
-    > <script src="@Assets["lib/sortablejs/Sortable.min.js"]"></script>
-    > ```
-    >
-    > For **.NET 10+ Blazor WebAssembly Standalone Apps**, configure the app `.csproj` and use a fingerprint placeholder:
-    > ```xml
-    > <PropertyGroup>
-    >   <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
-    > </PropertyGroup>
-    > <ItemGroup>
-    >   <StaticWebAssetFingerprintPattern Include="JS" Pattern="*.js" Expression="#[.{fingerprint}]!" />
-    > </ItemGroup>
-    > ```
-    > ```html
-    > <script src="lib/sortablejs/Sortable.min#[.{fingerprint}].js"></script>
-    > ```
-    >
-    > If needed, you can add a query string that matches the SortableJS version:
-    > ```html
-    > <script src="lib/sortablejs/Sortable.min.js?v=1.15.7"></script>
-    > ```
-
-2. (Optional) Add base styles to the `<head>` element of the same host page:
-    ```html
-    <link rel="stylesheet" href="_content/BlazorSortable/blazor-sortable.css" />
-    ```
-
-    > For **.NET 9+ Blazor Web App**, you can use static asset fingerprinting from a Razor file:
-    > ```razor
-    > <link rel="stylesheet" href="@Assets["_content/BlazorSortable/blazor-sortable.css"]" />
-    > ```
-    >
-    > From a Razor file, you can also use the current BlazorSortable assembly version as a cache-busting query string:
-    > ```razor
-    > <link rel="stylesheet" href="_content/BlazorSortable/blazor-sortable.css?v=@(typeof(BlazorSortable.Sortable<>).Assembly.GetName().Version)" />
-    > ```
-    >
-    >> For **Blazor WebAssembly Standalone App**, use the assembly-version query string inside the `<HeadContent>` section of `App.razor` and make sure `Program.cs` contains:
-    >> ```csharp
-    >> builder.RootComponents.Add<HeadOutlet>("head::after");
-    >> ```
-
-3. Add services in the `Program.cs` of the app where the component runs (`InteractiveWebAssembly` components require registration in the client app):
     ```csharp
     using BlazorSortable;
 
@@ -104,10 +42,52 @@ Add to your .csproj file:
     builder.Services.AddSortable();
     ```
 
-4. Add the using directive in `_Imports.razor`:
+2. Add the using directive in `_Imports.razor`:
+
     ```razor
     @using BlazorSortable
     ```
+
+By default, BlazorSortable loads the bundled SortableJS 1.15.7 script and the base stylesheet automatically when the first `Sortable` component is initialized.
+
+### SortableOptions
+
+`AddSortable` accepts an optional configuration delegate:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `AutoLoadSortableJs` | `bool` | `true` | Loads the bundled SortableJS script automatically |
+| `AutoLoadStylesheet` | `bool` | `true` | Loads the bundled BlazorSortable stylesheet automatically |
+
+### Manual Asset Loading
+
+If you want to manage these assets yourself, disable automatic loading:
+
+```csharp
+builder.Services.AddSortable(options =>
+{
+    options.AutoLoadSortableJs = false;
+    options.AutoLoadStylesheet = false;
+});
+```
+
+When `AutoLoadSortableJs` is disabled, SortableJS must be available globally as `Sortable` before any `Sortable` component initializes.
+
+### Bundled Styles
+
+The bundled stylesheet contains only the default helper styles used by BlazorSortable:
+
+```css
+.sortable-ghost {
+    visibility: hidden;
+}
+
+.sortable-fallback {
+    opacity: 1 !important;
+}
+```
+
+You can disable it with `AutoLoadStylesheet = false` if you want to provide these styles yourself.
 
 ## Usage Example
 
@@ -177,7 +157,7 @@ Add to your .csproj file:
 
 ### Sortable
 
-> **Note:** Support for MultiDrag and Swap plugins will be added in future releases.
+> **Note:** MultiDrag and Swap plugin options are not currently supported by the component, but may be considered for a future release.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -220,9 +200,9 @@ Add to your .csproj file:
 | `FallbackOnBody` | `bool` | `false` | Appends the cloned DOM element to the document body |
 | `FallbackTolerance` | `int` | `0` | Emulates the native drag threshold. Specify in pixels how far the mouse should move before it is considered a drag. Values between `3` and `5` are good |
 | `Scroll` | `bool` | `true` | Enables scrolling of the container during dragging |
-| `OnUpdate` | `Action<SortableEventArgs<TItem>>?` | `null` | Raised when the order of items is changed |
-| `OnAdd` | `Action<SortableEventArgs<TItem>>?` | `null` | Raised when an item is accepted by the component |
-| `OnRemove` | `Action<SortableEventArgs<TItem>>?` | `null` | Raised when an item is removed from the component |
+| `OnUpdate` | `EventCallback<SortableEventArgs<TItem>>` | `default` | Raised when the order of items is changed |
+| `OnAdd` | `EventCallback<SortableEventArgs<TItem>>` | `default` | Raised when an item is accepted by the component |
+| `OnRemove` | `EventCallback<SortableEventArgs<TItem>>` | `default` | Raised when an item is removed from the component |
 
 ### SortablePullMode
 
@@ -255,9 +235,9 @@ The `SortableEventArgs<TItem>` class provides information about sorting operatio
 | Property | Type | Description |
 |----------|------|-------------|
 | `Item` | `TItem` | The item participating in the operation |
-| `From` | `ISortableInfo` | Source sortable information |
+| `From` | `SortableInfo` | Source sortable information |
 | `OldIndex` | `int` | The previous index of the item in the source sortable |
-| `To` | `ISortableInfo` | Target sortable information |
+| `To` | `SortableInfo` | Target sortable information |
 | `NewIndex` | `int` | The new index of the item in the target sortable |
 | `IsClone` | `bool` | Flag indicating whether the item is a clone |
 
@@ -268,12 +248,12 @@ The `SortableTransferContext<TItem>` class represents the context of transferrin
 | Property | Type | Description |
 |----------|------|-------------|
 | `Item` | `TItem` | The item being transferred between sortable components |
-| `From` | `ISortableInfo` | The source sortable information |
-| `To` | `ISortableInfo` | The target sortable information |
+| `From` | `SortableInfo` | The source sortable information |
+| `To` | `SortableInfo` | The target sortable information |
 
-### ISortableInfo
+### SortableInfo
 
-The `ISortableInfo` interface provides sortable identity information.
+The `SortableInfo` type provides sortable identity information.
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -285,10 +265,6 @@ The `ISortableInfo` interface provides sortable identity information.
 - **Order of events when dragging between components:**
     1. `OnAdd` is triggered **first** - during this event, the item is **still present in the source component**.
     2. `OnRemove` is triggered **after**.
-
-- **Events use `Action<T>?` instead of `EventCallback<T>`:**
-
-    `EventCallback<T>` uses the component event pipeline, which calls `StateHasChanged()` on the receiving `ComponentBase` after the handler runs. This causes conflicts between the DOM and the data model for this component.
 
 - **Type mismatch / failed conversion:**
 
