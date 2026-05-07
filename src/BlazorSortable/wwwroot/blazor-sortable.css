@@ -5,3 +5,13 @@
 .sortable-fallback {
     opacity: 1 !important;
 }
+
+.sortable-selected {
+    outline: var(--blazor-sortable-selected-outline, 2px solid highlight);
+    outline-offset: var(--blazor-sortable-selected-outline-offset, -2px);
+}
+
+.sortable-swap-highlight {
+    outline: var(--blazor-sortable-swap-highlight-outline, 2px solid highlight);
+    outline-offset: var(--blazor-sortable-swap-highlight-outline-offset, -2px);
+}

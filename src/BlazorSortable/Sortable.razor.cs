@@ -31,11 +31,25 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public RenderFragment<TItem>? ChildContent { get; set; }
 
     /// <summary>
-    /// Function used to generate a stable key for each item, used in the <c>@key</c> directive for rendering.
-    /// If not provided, the item itself is used as the key.
+    /// Uses Blazor keys for rendered item wrappers.
     /// </summary>
+    /// <remarks>
+    /// Enabled by default to preserve item identity and child component state during reordering.
+    /// Disable only when the same item key can appear more than once in the same Sortable component.
+    /// </remarks>
     [Parameter]
-    public Func<TItem, object>? KeySelector { get; set; }
+    public bool UseItemKeys { get; set; } = true;
+
+    /// <summary>
+    /// Function used to generate a stable Blazor key for each rendered item.
+    /// </summary>
+    /// <remarks>
+    /// Keys must be unique among items rendered by the same Sortable component.
+    /// If not provided, the item itself is used as the key.
+    /// Used only when <see cref="UseItemKeys"/> is true.
+    /// </remarks>
+    [Parameter]
+    public Func<TItem, object>? ItemKeySelector { get; set; }
 
     /// <summary>
     /// CSS class applied to the root container of the Sortable component.
@@ -142,15 +156,13 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public Predicate<SortableTransferContext<object>>? PutFunction { get; set; }
 
     /// <summary>
-    /// Converts an incoming item when it is not assignable to the target item type.
+    /// Gets or sets the function used to convert an item to a sortable value.
     /// </summary>
-    /// <remarks>
-    /// This function is used only when an item dragged from another Sortable component
-    /// cannot be assigned to <typeparamref name="TItem"/> directly.
-    /// Return <see langword="null"/> when the item cannot be converted.
-    /// </remarks>
+    /// <remarks>The conversion function is applied to each item to determine its sort order. If not set, the
+    /// default sorting behavior is used. This property is typically used to customize sorting for complex types or when
+    /// a specific value should be used for comparison.</remarks>
     [Parameter]
-    public Func<SortableTransferContext<object>, TItem?>? ConvertFunction { get; set; }
+    public SortableConvertFunc<TItem>? ConvertFunction { get; set; }
 
     /// <summary>
     /// Enables or disables sorting within this Sortable component.
@@ -289,55 +301,55 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     [Parameter]
     public int FallbackTolerance { get; set; }
 
-    ///// <summary>
-    ///// Enables multi-drag functionality.
-    ///// </summary>
-    //[Parameter]
-    //public bool MultiDrag { get; set; }
+    /// <summary>
+    /// Enables multi-drag functionality.
+    /// </summary>
+    [Parameter]
+    public bool MultiDrag { get; set; }
 
-    ///// <summary>
-    ///// CSS class for selected items in multi-drag mode.
-    ///// </summary>
-    //[Parameter]
-    //public string SelectedClass { get; set; } = "sortable-selected";
+    /// <summary>
+    /// CSS class for selected items in multi-drag mode.
+    /// </summary>
+    [Parameter]
+    public string SelectedClass { get; set; } = "sortable-selected";
 
-    ///// <summary>
-    ///// Key used to enable multi-drag selection.
-    ///// </summary>
-    ///// <remarks>
-    ///// Default is "Control" key. Users must hold this key while clicking to select multiple items.
-    ///// </remarks>
-    //[Parameter]
-    //public string? MultiDragKey { get; set; } = "Control";
+    /// <summary>
+    /// Key used to enable multi-drag selection.
+    /// </summary>
+    /// <remarks>
+    /// Default is "Control" key. Users must hold this key while clicking to select multiple items.
+    /// </remarks>
+    [Parameter]
+    public string? MultiDragKey { get; set; } = "Control";
 
-    ///// <summary>
-    ///// Prevents automatic deselection when clicking on selected items.
-    ///// </summary>
-    ///// <remarks>
-    ///// When true, clicking on a selected item will not deselect it.
-    ///// Useful for maintaining selection state during complex interactions.
-    ///// </remarks>
-    //[Parameter]
-    //public bool AvoidImplicitDeselect { get; set; }
+    /// <summary>
+    /// Prevents automatic deselection when clicking on selected items.
+    /// </summary>
+    /// <remarks>
+    /// When true, clicking on a selected item will not deselect it.
+    /// Useful for maintaining selection state during complex interactions.
+    /// </remarks>
+    [Parameter]
+    public bool AvoidImplicitDeselect { get; set; }
 
-    ///// <summary>
-    ///// Enables swap mode for dragging.
-    ///// </summary>
-    ///// <remarks>
-    ///// When enabled, dragging an item over another item will swap their positions
-    ///// instead of inserting the dragged item at the new position.
-    ///// </remarks>
-    //[Parameter]
-    //public bool Swap { get; set; }
+    /// <summary>
+    /// Enables swap mode for dragging.
+    /// </summary>
+    /// <remarks>
+    /// When enabled, dragging an item over another item will swap their positions
+    /// instead of inserting the dragged item at the new position.
+    /// </remarks>
+    [Parameter]
+    public bool Swap { get; set; }
 
-    ///// <summary>
-    ///// CSS class applied to items during swap highlighting.
-    ///// </summary>
-    ///// <remarks>
-    ///// Applied to items that would be swapped when <see cref="Swap"/> is enabled.
-    ///// </remarks>
-    //[Parameter]
-    //public string SwapClass { get; set; } = "sortable-swap-highlight";
+    /// <summary>
+    /// CSS class applied to items during swap highlighting.
+    /// </summary>
+    /// <remarks>
+    /// Applied to items that would be swapped when <see cref="Swap"/> is enabled.
+    /// </remarks>
+    [Parameter]
+    public string SwapClass { get; set; } = "sortable-swap-highlight";
 
     /// <summary>
     /// Enables scrolling of the container during dragging.
@@ -366,6 +378,18 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     [Parameter]
     public EventCallback<SortableEventArgs<TItem>> OnRemove { get; set; }
 
+    /// <summary>
+    /// Event that occurs when an item is selected in multi-drag mode.
+    /// </summary>
+    [Parameter]
+    public EventCallback<SortableSelectionEventArgs<TItem>> OnSelect { get; set; }
+
+    /// <summary>
+    /// Event that occurs when an item is deselected in multi-drag mode.
+    /// </summary>
+    [Parameter]
+    public EventCallback<SortableSelectionEventArgs<TItem>> OnDeselect { get; set; }
+
     [Inject] private IJSRuntime JsRuntime { get; set; } = default!;
     [Inject] private SortableRegistry SortableRegistry { get; set; } = default!;
     [Inject] private IOptions<SortableOptions> Options { get; set; } = default!;
@@ -374,7 +398,17 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     private DotNetObjectReference<Sortable<TItem>>? selfReference;
 
     private int draggedItemIndex = -1;
+    private int[] draggedItemIndexes = [];
+
     private bool shouldSkipNextRemove;
+
+    private TItem pendingSwapItem = default!;
+    private bool hasPendingSwapItem;
+
+    private object GetItemKey(TItem item) => ItemKeySelector?.Invoke(item) ?? item;
+
+    private string? GetItemClass(TItem item) =>
+        DraggableSelector?.Invoke(item) == true ? DraggableClass : null;
 
     /// <inheritdoc/>
     protected override void OnParametersSet()
@@ -400,6 +434,18 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             case SortablePutMode.Function:
                 ArgumentNullException.ThrowIfNull(PutFunction);
                 break;
+        }
+
+        if (Swap && MultiDrag)
+        {
+            throw new InvalidOperationException(
+                $"{nameof(Swap)} cannot be used together with {nameof(MultiDrag)}.");
+        }
+
+        if (Swap && Pull == SortablePullMode.Clone)
+        {
+            throw new InvalidOperationException(
+                $"{nameof(Swap)} cannot be used together with {nameof(SortablePullMode.Clone)}.");
         }
     }
 
@@ -504,21 +550,21 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         if (DraggableSelector is not null)
             options["draggable"] = "." + DraggableClass;
 
-        //if (MultiDrag)
-        //{
-        //    options["multiDrag"] = true;
-        //    options["selectedClass"] = SelectedClass;
-        //    options["avoidImplicitDeselect"] = AvoidImplicitDeselect;
+        if (MultiDrag)
+        {
+            options["multiDrag"] = true;
+            options["selectedClass"] = SelectedClass;
+            options["avoidImplicitDeselect"] = AvoidImplicitDeselect;
 
-        //    if (!string.IsNullOrWhiteSpace(MultiDragKey))
-        //        options["multiDragKey"] = MultiDragKey;
-        //}
+            if (!string.IsNullOrWhiteSpace(MultiDragKey))
+                options["multiDragKey"] = MultiDragKey;
+        }
 
-        //if (Swap)
-        //{
-        //    options["swap"] = true;
-        //    options["swapClass"] = SwapClass;
-        //}
+        if (Swap)
+        {
+            options["swap"] = true;
+            options["swapClass"] = SwapClass;
+        }
 
         options["scroll"] = Scroll;
 
@@ -549,42 +595,88 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 #pragma warning disable CS1591, IDE1006
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnStartJs(int index) => draggedItemIndex = index;
+    public void OnStartJs(int index, int[] indexes)
+    {
+        draggedItemIndex = index;
+        draggedItemIndexes = indexes;
+    }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public void OnEndJs() => draggedItemIndex = -1;
+    public void OnEndJs()
+    {
+        draggedItemIndex = -1;
+        draggedItemIndexes = [];
+    }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
     public bool OnPullJs(string toId)
     {
         var to = SortableRegistry[toId];
-        var item = Items![draggedItemIndex];
 
-        return PullFunction!(new SortableTransferContext<TItem>(
-            item, CreateInfo(this), CreateInfo(to)));
+        var item = Items![draggedItemIndex];
+        var items = draggedItemIndexes.Select(i => Items[i]).ToArray();
+
+        return PullFunction!(new(
+            item, items, CreateInfo(this), CreateInfo(to)));
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
     public bool OnPutJs(string fromId)
     {
         var from = SortableRegistry[fromId];
-        var item = from.GetTransferItem(from.DraggedItemIndex);
 
-        return PutFunction!(new SortableTransferContext<object>(
-            item, CreateInfo(from), CreateInfo(this)));
+        var item = from.GetTransferItem(from.DraggedItemIndex);
+        var items = from.DraggedItemIndexes.Select(from.GetTransferItem).ToArray();
+
+        return PutFunction!(new(
+            item, items, CreateInfo(from), CreateInfo(this)));
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public async Task OnUpdateJs(int oldIndex, int newIndex)
+    public async Task OnUpdateJs(
+        int oldIndex,
+        int[] oldIndexes,
+        int newIndex,
+        int[] newIndexes,
+        bool isSwap)
     {
         var item = Items![oldIndex];
+        var items = oldIndexes.Select(i => Items[i]).ToArray();
 
-        // Sometimes SortableJS provides newIndex one greater than the last valid index
-        if (Items.Count == 1 && newIndex == 1)
-            newIndex = 0;
+        if (oldIndexes.Length > 0)
+        {
+            var moves = oldIndexes
+                .Select((index, i) => new
+                {
+                    OldIndex = index,
+                    NewIndex = newIndexes[i],
+                    Item = Items[index]
+                })
+                .ToArray();
 
-        Items.RemoveAt(oldIndex);
-        Items.Insert(newIndex, item);
+            // SortableJS MultiDrag reports old indexes in ascending order.
+            // Remove from the end so earlier removals do not shift later indexes.
+            for (var i = moves.Length - 1; i >= 0; i--)
+                Items.RemoveAt(moves[i].OldIndex);
+
+            // SortableJS MultiDrag reports new indexes in ascending order.
+            // Insert in that order so each item lands at its reported final index.
+            foreach (var move in moves)
+                Items.Insert(move.NewIndex, move.Item);
+        }
+        else if (isSwap)
+        {
+            (Items[oldIndex], Items[newIndex]) = (Items[newIndex], Items[oldIndex]);
+        }
+        else
+        {
+            // Sometimes SortableJS provides newIndex one greater than the last valid index.
+            if (Items.Count == 1 && newIndex == 1)
+                newIndex = 0;
+
+            Items.RemoveAt(oldIndex);
+            Items.Insert(newIndex, item);
+        }
 
         try
         {
@@ -593,7 +685,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 var info = CreateInfo(this);
 
                 await OnUpdate.InvokeAsync(new SortableEventArgs<TItem>(
-                    item, info, oldIndex, info, newIndex));
+                    item, items, info, oldIndex, oldIndexes, info, newIndex, newIndexes));
             }
         }
         finally
@@ -603,36 +695,64 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public async Task OnAddJs(string fromId, int oldIndex, int newIndex, bool isClone)
+    public async Task OnAddJs(
+        string fromId,
+        int oldIndex,
+        int[] oldIndexes,
+        int newIndex,
+        int[] newIndexes,
+        bool isClone,
+        bool isSwap)
     {
         var from = SortableRegistry[fromId];
         from.ShouldSkipNextRemove = !isClone;
 
-        var sourceObject = from.GetTransferItem(oldIndex);
+        var isMultiDragOperation = oldIndexes.Length > 0;
+
+        var sourceIndexes = isMultiDragOperation
+            ? oldIndexes
+            : [oldIndex];
+
+        var sourceObjects = sourceIndexes
+            .Select(from.GetTransferItem)
+            .ToArray();
+
         var fromInfo = CreateInfo(from);
         var toInfo = CreateInfo(this);
 
-        TItem item;
-        if (sourceObject is TItem sourceItem)
-        {
-            item = sourceItem;
-        }
-        else if (ConvertFunction is not null)
-        {
-            var convertedItem = ConvertFunction(new SortableTransferContext<object>(
-                sourceObject, fromInfo, toInfo));
+        var convertedByOldIndex = new Dictionary<int, TItem>();
 
-            if (convertedItem is null)
+        for (var i = 0; i < sourceObjects.Length; i++)
+        {
+            if (!TryConvertTransferItem(sourceObjects[i], sourceObjects, fromInfo, toInfo, out var convertedItem))
                 return;
 
-            item = convertedItem;
-        }
-        else
-        {
-            return;
+            convertedByOldIndex[sourceIndexes[i]] = convertedItem;
         }
 
-        Items?.Insert(newIndex, item);
+        if (Items is not null)
+        {
+            if (isSwap)
+            {
+                var swapItem = Items[newIndex];
+
+                if (!from.TrySetPendingSwapItem(swapItem, fromInfo, toInfo))
+                    return;
+
+                Items[newIndex] = convertedByOldIndex[oldIndex];
+            }
+            else if (isMultiDragOperation)
+            {
+                // SortableJS MultiDrag reports new indexes in ascending order.
+                // Insert in that order so each item lands at its reported final index.
+                for (var i = 0; i < oldIndexes.Length; i++)
+                    Items.Insert(newIndexes[i], convertedByOldIndex[oldIndexes[i]]);
+            }
+            else
+            {
+                Items.Insert(newIndex, convertedByOldIndex[oldIndex]);
+            }
+        }
 
         from.ShouldSkipNextRemove = false;
 
@@ -640,8 +760,11 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         {
             if (OnAdd.HasDelegate)
             {
-                await OnAdd.InvokeAsync(new SortableEventArgs<TItem>(
-                    item, fromInfo, oldIndex, toInfo, newIndex, isClone));
+                var item = convertedByOldIndex[oldIndex];
+                var items = oldIndexes.Select(i => convertedByOldIndex[i]).ToArray();
+
+                await OnAdd.InvokeAsync(
+                    new(item, items, fromInfo, oldIndex, oldIndexes, toInfo, newIndex, newIndexes, isClone));
             }
         }
         finally
@@ -651,7 +774,12 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     }
 
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
-    public async Task OnRemoveJs(int oldIndex, string toId, int newIndex)
+    public async Task OnRemoveJs(
+        int oldIndex,
+        int[] oldIndexes,
+        string toId,
+        int newIndex,
+        int[] newIndexes)
     {
         if (shouldSkipNextRemove)
         {
@@ -659,17 +787,39 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             return;
         }
 
-        // Capture the removed item before mutating the collection
+        // Capture the removed items before mutating the collection
         var item = Items![oldIndex];
+        var items = oldIndexes.Select(i => Items[i]).ToArray();
 
-        Items.RemoveAt(oldIndex);
+        var isMultiDragOperation = oldIndexes.Length > 0;
+
+        if (hasPendingSwapItem)
+        {
+            Items[oldIndex] = pendingSwapItem;
+            pendingSwapItem = default!;
+            hasPendingSwapItem = false;
+        }
+        else if (isMultiDragOperation)
+        {
+            // SortableJS MultiDrag reports old indexes in ascending order.
+            // Remove from the end so earlier removals do not shift later indexes.
+            for (var i = oldIndexes.Length - 1; i >= 0; i--)
+                Items.RemoveAt(oldIndexes[i]);
+        }
+        else
+        {
+            Items.RemoveAt(oldIndex);
+        }
 
         try
         {
             if (OnRemove.HasDelegate)
             {
-                await OnRemove.InvokeAsync(new SortableEventArgs<TItem>(
-                    item, CreateInfo(this), oldIndex, CreateInfo(SortableRegistry[toId]), newIndex));
+                var from = CreateInfo(this);
+                var to = CreateInfo(SortableRegistry[toId]);
+
+                await OnRemove.InvokeAsync(new(
+                    item, items, from, oldIndex, oldIndexes, to, newIndex, newIndexes));
             }
         }
         finally
@@ -678,7 +828,55 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         }
     }
 
+    [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
+    public async Task OnSelectJs(int index, int[] selectedIndexes)
+    {
+        if (!OnSelect.HasDelegate)
+            return;
+
+        var item = Items![index];
+        var selectedItems = selectedIndexes.Select(i => Items[i]).ToArray();
+
+        await OnSelect.InvokeAsync(new(item, selectedItems));
+    }
+
+    [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
+    public async Task OnDeselectJs(int index, int[] selectedIndexes)
+    {
+        if (!OnDeselect.HasDelegate)
+            return;
+
+        var item = Items![index];
+        var selectedItems = selectedIndexes.Select(i => Items[i]).ToArray();
+
+        await OnDeselect.InvokeAsync(new(item, selectedItems));
+    }
+
 #pragma warning restore CS1591, IDE1006
+
+    private bool TryConvertTransferItem(
+        object sourceObject,
+        IReadOnlyList<object> sourceObjects,
+        SortableInfo from,
+        SortableInfo to,
+        out TItem item)
+    {
+        if (sourceObject is TItem sourceItem)
+        {
+            item = sourceItem;
+            return true;
+        }
+
+        if (ConvertFunction is null)
+        {
+            item = default!;
+            return false;
+        }
+
+        return ConvertFunction(
+            new(sourceObject, sourceObjects, from, to),
+            out item);
+    }
 
     object ISortableList.GetTransferItem(int index)
     {
@@ -689,7 +887,20 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             : item;
     }
 
+    bool ISortableList.TrySetPendingSwapItem(object item, SortableInfo from, SortableInfo to)
+    {
+        if (!TryConvertTransferItem(item, [], from, to, out var convertedItem))
+            return false;
+
+        pendingSwapItem = convertedItem;
+        hasPendingSwapItem = true;
+
+        return true;
+    }
+
     int ISortableList.DraggedItemIndex => draggedItemIndex;
+
+    IReadOnlyList<int> ISortableList.DraggedItemIndexes => draggedItemIndexes;
 
     bool ISortableList.ShouldSkipNextRemove
     {

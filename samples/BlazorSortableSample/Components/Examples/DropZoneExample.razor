@@ -3,8 +3,7 @@
                 CodeContent="@codeContent">
     <RadzenStack>
         <RadzenStack Orientation="Orientation.Horizontal">
-            <Sortable TItem="ClassA"
-                      Items="classAItems"
+            <Sortable Items="classAItems"
                       Class="items-column"
                       Group="drop1">
                 <RadzenCard class="item">
@@ -12,8 +11,7 @@
                 </RadzenCard>
             </Sortable>
 
-            <Sortable TItem="ClassB"
-                      Items="classBItems"
+            <Sortable Items="classBItems"
                       Class="items-column"
                       Group="drop2">
                 <RadzenCard class="item">
@@ -40,8 +38,7 @@
     private string codeContent = @"
 <div class=""stack"">
     <div class=""row"">
-        <Sortable TItem=""ClassA""
-                  Items=""classAItems""
+        <Sortable Items=""classAItems""
                   Class=""items-column""
                   Group=""drop1"">
             <div class=""item"">
@@ -49,8 +46,7 @@
             </div>
         </Sortable>
 
-        <Sortable TItem=""ClassB""
-                  Items=""classBItems""
+        <Sortable Items=""classBItems""
                   Class=""items-column""
                   Group=""drop2"">
             <div class=""item"">
@@ -64,5 +60,10 @@
               Put=""SortablePutMode.Groups""
               PutGroups=""@([""drop1"", ""drop2""])""
               GhostClass=""drop-zone-ghost"" />
-</div>";
+</div>
+
+@code {
+    private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
+    private readonly IList<ClassB> classBItems = Utils.CreateItemList<ClassB>(5);
+}";
 }

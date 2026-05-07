@@ -1,8 +1,7 @@
 <ExampleSection Id="@Id"
                 Title="Simple list"
                 CodeContent="@codeContent">
-    <Sortable TItem="ClassA"
-              Items="classAItems"
+    <Sortable Items="classAItems"
               Class="items-column"
               Delay="150"
               DelayOnTouchOnly="true">
@@ -19,13 +18,16 @@
     private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
 
     private string codeContent = @"
-<Sortable TItem=""ClassA""
-          Items=""classAItems""
+<Sortable Items=""classAItems""
           Class=""items-column""
           Delay=""150""
           DelayOnTouchOnly=""true"">
     <div class=""item"">
         @context
     </div>
-</Sortable>";
+</Sortable>
+
+@code {
+    private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
+}";
 }

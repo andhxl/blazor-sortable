@@ -2,23 +2,22 @@
                 Title="Advanced"
                 CodeContent="@codeContent">
     <RadzenStack Orientation="Orientation.Horizontal">
-        <Sortable TItem="ClassA"
-                  Items="classAItems"
+        <Sortable Items="classAItems"
                   Class="items-column"
                   Pull="SortablePullMode.Clone"
                   CloneFunction="i => new() { Value = i.Value }"
+                  GhostClass="clone-ghost"
                   Sort="false">
             <RadzenCard class="item">
                 @context
             </RadzenCard>
         </Sortable>
 
-        <Sortable TItem="ClassB"
-                  Items="classBItems"
+        <Sortable Items="classBItems"
                   Class="items-column"
                   Put="SortablePutMode.Function"
                   PutFunction="c => c.Item is ClassA i && i.Value < 4"
-                  ConvertFunction="c => c.Item is ClassA i ? new() { Value = i.Value } : null"
+                  ConvertFunction="TryConvertToClassB"
                   InvertSwap="true">
             <RadzenCard class="item">
                 @context
@@ -34,29 +33,57 @@
     private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
     private readonly IList<ClassB> classBItems = Utils.CreateItemList<ClassB>(5, 6);
 
+    private static bool TryConvertToClassB(SortableTransferContext<object> context, out ClassB item)
+    {
+        if (context.Item is ClassA classA)
+        {
+            item = new ClassB { Value = classA.Value };
+            return true;
+        }
+
+        item = default!;
+        return false;
+    }
+
     private string codeContent = @"
 <div class=""row"">
-    <Sortable TItem=""ClassA""
-              Items=""classAItems""
+    <Sortable Items=""classAItems""
               Class=""items-column""
               Pull=""SortablePullMode.Clone""
               CloneFunction=""i => new() { Value = i.Value }""
+              GhostClass=""clone-ghost""
               Sort=""false"">
         <div class=""item"">
             @context
         </div>
     </Sortable>
 
-    <Sortable TItem=""ClassB""
-              Items=""classBItems""
+    <Sortable Items=""classBItems""
               Class=""items-column""
               Put=""SortablePutMode.Function""
               PutFunction=""c => c.Item is ClassA i && i.Value < 4""
-              ConvertFunction=""c => c.Item is ClassA i ? new() { Value = i.Value } : null""
+              ConvertFunction=""TryConvertToClassB""
               InvertSwap=""true"">
         <div class=""item"">
             @context
         </div>
     </Sortable>
-</div>";
+</div>
+
+@code {
+    private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
+    private readonly IList<ClassB> classBItems = Utils.CreateItemList<ClassB>(5, 6);
+
+    private static bool TryConvertToClassB(SortableTransferContext<object> context, out ClassB item)
+    {
+        if (context.Item is ClassA classA)
+        {
+            item = new ClassB { Value = classA.Value };
+            return true;
+        }
+
+        item = default!;
+        return false;
+    }
+}";
 }

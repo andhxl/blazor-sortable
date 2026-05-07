@@ -1,10 +1,11 @@
 <ExampleSection Id="@Id"
-                Title="Shared lists"
+                Title="Swap"
                 CodeContent="@codeContent">
     <RadzenStack Orientation="Orientation.Horizontal">
         <Sortable Items="classAItems1"
                   Class="items-column"
-                  Group="shared-lists">
+                  Swap="true"
+                  Group="swap">
             <RadzenCard class="item">
                 @context
             </RadzenCard>
@@ -12,7 +13,8 @@
 
         <Sortable Items="classAItems2"
                   Class="items-column"
-                  Group="shared-lists">
+                  Swap="true"
+                  Group="swap">
             <RadzenCard class="item">
                 @context
             </RadzenCard>
@@ -31,7 +33,8 @@
 <div class=""row"">
     <Sortable Items=""classAItems1""
               Class=""items-column""
-              Group=""shared-lists"">
+              Swap=""true""
+              Group=""swap"">
         <div class=""item"">
             @context
         </div>
@@ -39,7 +42,8 @@
 
     <Sortable Items=""classAItems2""
               Class=""items-column""
-              Group=""shared-lists"">
+              Swap=""true""
+              Group=""swap"">
         <div class=""item"">
             @context
         </div>

@@ -125,3 +125,7 @@ pre {
 .drop-zone-ghost {
     opacity: 0.5;
 }
+
+.clone-ghost {
+    visibility: visible;
+}
