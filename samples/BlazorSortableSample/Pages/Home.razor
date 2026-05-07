@@ -1,25 +1,10 @@
 @page "/"
 
-<RadzenStack Gap="8px">
-    <RadzenStack AlignItems="AlignItems.Center">
-        <RadzenText TextStyle="TextStyle.DisplayH4">
-            <strong>BlazorSortableSample</strong>
-        </RadzenText>
+@inject NavigationManager Navigation
 
-        <a href="#multi-drag">Multi drag</a>
-        <a href="#swap">Swap</a>
-        <a href="#simple-list">Simple list</a>
-        <a href="#shared-lists">Shared lists</a>
-        <a href="#handle">Handle</a>
-        <a href="#drop-zone">Drop zone</a>
-        <a href="#advanced">Advanced</a>
-    </RadzenStack>
-
-    <MultiDragExample Id="multi-drag" />
-    <SwapExample Id="swap" />
-    <SimpleListExample Id="simple-list" />
-    <SharedListsExample Id="shared-lists" />
-    <HandleExample Id="handle" />
-    <DropZoneExample Id="drop-zone" />
-    <AdvancedExample Id="advanced" />
-</RadzenStack>
+@code {
+    protected override void OnInitialized()
+    {
+        Navigation.NavigateTo(ExampleCatalog.GetPath(ExampleCatalog.All[0].Id), replace: true);
+    }
+}

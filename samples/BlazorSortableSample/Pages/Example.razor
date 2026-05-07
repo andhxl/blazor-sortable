@@ -1,0 +1,24 @@
+@attribute [Route(ExampleCatalog.RouteTemplate)]
+
+@if (example is not null)
+{
+    <ErrorBoundary @key="Id">
+        <DynamicComponent Type="@example.Value.Type" />
+    </ErrorBoundary>
+}
+else
+{
+    <NotFound />
+}
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+
+    private (Type Type, string Id, string Title)? example;
+
+    protected override void OnParametersSet()
+    {
+        example = ExampleCatalog.Find(Id);
+    }
+}

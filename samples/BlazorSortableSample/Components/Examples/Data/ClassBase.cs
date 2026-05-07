@@ -1,8 +1,6 @@
 namespace BlazorSortableSample.Components.Examples.Data;
 
-public abstract class ClassBase
+public abstract record ClassBase
 {
-    public int Value { get; set; }
-
-    public override string ToString() => $"{GetType().Name}: {Value}";
+    public int Value { get; init; }
 }

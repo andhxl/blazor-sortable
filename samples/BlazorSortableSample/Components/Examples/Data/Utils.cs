@@ -2,13 +2,13 @@ namespace BlazorSortableSample.Components.Examples.Data;
 
 public static class Utils
 {
-    public static IList<T> CreateItemList<T>(int count, int startValue = 1)
-        where T : ClassBase, new()
+    public static IList<TItem> CreateItemList<TItem>(int count, int startValue = 1)
+        where TItem : ClassBase, new()
     {
-        var list = new List<T>(count);
+        var list = new List<TItem>(count);
 
         for (int i = 0; i < count; i++)
-            list.Add(new T { Value = startValue++ });
+            list.Add(new TItem { Value = startValue++ });
 
         return list;
     }

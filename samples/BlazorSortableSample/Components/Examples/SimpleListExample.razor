@@ -1,6 +1,8 @@
+@implements IExample
+
 <ExampleSection Id="@Id"
-                Title="Simple list"
-                CodeContent="@codeContent">
+                Title="@Title"
+                CodeContent="@CodeContent">
     <Sortable Items="classAItems"
               Class="items-column"
               Delay="150"
@@ -12,12 +14,12 @@
 </ExampleSection>
 
 @code {
-    [Parameter, EditorRequired]
-    public string Id { get; set; }
+    public static string Id => "simple-list";
+    public static string Title => "Simple list";
 
     private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
 
-    private string codeContent = @"
+    private const string CodeContent = @"
 <Sortable Items=""classAItems""
           Class=""items-column""
           Delay=""150""

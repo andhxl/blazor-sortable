@@ -12,6 +12,9 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 builder.Services.AddRadzenComponents();
 
-builder.Services.AddSortable();
+builder.Services.AddSortable(options =>
+{
+    options.Defaults.FallbackOnBody = true;
+});
 
 await builder.Build().RunAsync();
