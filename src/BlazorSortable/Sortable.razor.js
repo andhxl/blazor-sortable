@@ -95,17 +95,20 @@ function buildSortableOptions(options, component) {
         onRemove: (evt) => {
             revertDomMove(evt, false);
 
-            if (isCloneMode(evt)) {
+            const isClone = isCloneMode(evt);
+
+            if (isClone) {
                 removeClone(evt);
-            } else {
-                component.invokeMethodAsync(
-                    "OnRemoveJs",
-                    evt.oldIndex,
-                    getIndexes(evt.oldIndicies),
-                    evt.to.id,
-                    evt.newIndex,
-                    getIndexes(evt.newIndicies));
             }
+
+            component.invokeMethodAsync(
+                "OnRemoveJs",
+                evt.oldIndex,
+                getIndexes(evt.oldIndicies),
+                evt.to.id,
+                evt.newIndex,
+                getIndexes(evt.newIndicies),
+                isClone);
         },
         onSelect: (evt) => {
             component.invokeMethodAsync(
@@ -118,6 +121,21 @@ function buildSortableOptions(options, component) {
                 "OnDeselectJs",
                 getElementIndex(evt.from, evt.item),
                 getElementIndexes(evt.from, evt.items));
+        },
+        onSpill: (evt) => {
+            revertDomMove(evt, false);
+
+            const isClone = isCloneMode(evt);
+
+            if (isClone) {
+                removeClone(evt);
+            }
+
+            component.invokeMethodAsync(
+                "OnSpillJs",
+                getElementIndex(evt.from, evt.item),
+                getElementIndexes(evt.from, evt.items),
+                isClone);
         }
     };
 }
@@ -145,15 +163,21 @@ function revertDomMove(evt, isSwap) {
 }
 
 function revertDomSwap(evt) {
-    evt.item.remove();
+    const pairs = getMovedElementPairs(evt);
 
-    const sourceReferenceItem = evt.from.children[evt.oldIndex] ?? null;
-    evt.from.insertBefore(evt.item, sourceReferenceItem);
+    for (const pair of pairs) {
+        pair.element.remove();
+    }
 
     evt.swapItem.remove();
 
-    const targetReferenceItem = evt.to.children[evt.newIndex] ?? null;
-    evt.to.insertBefore(evt.swapItem, targetReferenceItem);
+    for (const pair of pairs) {
+        const referenceItem = evt.from.children[pair.oldIndex] ?? null;
+        evt.from.insertBefore(pair.element, referenceItem);
+    }
+
+    const swapReferenceItem = evt.to.children[evt.newIndex] ?? null;
+    evt.to.insertBefore(evt.swapItem, swapReferenceItem);
 }
 
 function getMovedElementPairs(evt) {
@@ -259,10 +283,10 @@ function getHeadStylesheetLinks() {
 }
 
 function insertHeadStylesheetLink(stylesheetLinks, link) {
-    const lastStylesheetLink = stylesheetLinks[stylesheetLinks.length - 1];
+    const firstStylesheetLink = stylesheetLinks[0];
 
-    if (lastStylesheetLink) {
-        lastStylesheetLink.after(link);
+    if (firstStylesheetLink) {
+        firstStylesheetLink.before(link);
     } else {
         document.head.appendChild(link);
     }

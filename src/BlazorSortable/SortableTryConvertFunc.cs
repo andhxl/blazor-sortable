@@ -11,7 +11,7 @@ namespace BlazorSortable;
 /// <param name="item">When this method returns, contains the converted item if the conversion succeeded; otherwise, the default value for
 /// the type.</param>
 /// <returns>true if the conversion was successful; otherwise, false.</returns>
-public delegate bool SortableConvertFunc<TItem>(
+public delegate bool SortableTryConvertFunc<TItem>(
     SortableTransferContext<object> context,
     out TItem item)
     where TItem : notnull;

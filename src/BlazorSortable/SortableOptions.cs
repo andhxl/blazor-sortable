@@ -20,4 +20,9 @@ public sealed class SortableOptions
     /// Set this value to <see langword="false" /> to provide your own styles or omit the stylesheet.
     /// </remarks>
     public bool AutoLoadStylesheet { get; set; } = true;
+
+    /// <summary>
+    /// Gets the default Sortable component behavior options.
+    /// </summary>
+    public SortableDefaultOptions Defaults { get; } = new();
 }
