@@ -85,6 +85,16 @@ The bundled stylesheet contains only the default helper styles used by BlazorSor
 .sortable-fallback {
     opacity: 1 !important;
 }
+
+.sortable-selected {
+    outline: var(--blazor-sortable-selected-outline-width, 2px) solid var(--blazor-sortable-selected-outline-color, Highlight);
+    outline-offset: calc(-1 * var(--blazor-sortable-selected-outline-width, 2px));
+}
+
+.sortable-swap-highlight {
+    outline: var(--blazor-sortable-swap-highlight-outline-width, 2px) solid var(--blazor-sortable-swap-highlight-outline-color, Highlight);
+    outline-offset: calc(-1 * var(--blazor-sortable-swap-highlight-outline-width, 2px));
+}
 ```
 
 You can disable it with `AutoLoadStylesheet = false` if you want to provide these styles yourself.
@@ -156,8 +166,6 @@ You can disable it with `AutoLoadStylesheet = false` if you want to provide thes
 ## Component Parameters
 
 ### Sortable
-
-> **Note:** MultiDrag and Swap plugin options are not currently supported by the component, but may be considered for a future release.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
