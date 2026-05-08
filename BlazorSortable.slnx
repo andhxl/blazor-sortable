@@ -11,6 +11,6 @@
     <File Path="README.md" />
     <File Path="THIRD-PARTY-NOTICES.txt" />
   </Folder>
-  <Project Path="samples/BlazorSortableSample/BlazorSortableSample.csproj" />
+  <Project Path="samples/BlazorSortableDemo/BlazorSortableDemo.csproj" />
   <Project Path="src/BlazorSortable/BlazorSortable.csproj" />
 </Solution>

@@ -1,0 +1,39 @@
+@inherits LayoutComponentBase
+
+<RadzenComponents />
+
+<RadzenLayout>
+    <RadzenHeader>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                <RadzenSidebarToggle Click="() => sidebarExpanded = !sidebarExpanded" />
+                <RadzenLabel Text="BlazorSortable Demo" />
+                <GitHubLink />
+            </RadzenStack>
+
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center"
+                         Style="margin-left: auto;">
+                <RadzenAppearanceToggle title="Toggle theme" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenHeader>
+
+    <RadzenSidebar @bind-Expanded="sidebarExpanded" Style="width: fit-content;">
+        <RadzenPanelMenu>
+            @foreach (var example in ExampleCatalog.All)
+            {
+                <RadzenPanelMenuItem Text="@example.Title"
+                                     Path="@ExampleCatalog.GetPath(example.Id)" />
+            }
+        </RadzenPanelMenu>
+    </RadzenSidebar>
+
+    <RadzenBody>
+        @Body
+    </RadzenBody>
+</RadzenLayout>
+
+@code {
+    bool sidebarExpanded = true;
+}

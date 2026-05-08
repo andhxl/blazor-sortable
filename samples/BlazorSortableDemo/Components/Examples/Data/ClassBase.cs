@@ -1,4 +1,4 @@
-namespace BlazorSortableSample.Components.Examples.Data;
+namespace BlazorSortableDemo.Components.Examples.Data;
 
 public abstract record ClassBase
 {
