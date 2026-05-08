@@ -1,4 +1,4 @@
-namespace BlazorSortableDemo.Components.Examples;
+namespace BlazorSortableDemo.Pages.Examples;
 
 public interface IExample
 {

@@ -1,4 +1,5 @@
 @implements IExample
+@inject NotificationService NotificationService
 
 <ExampleSection Id="@Id"
                 Title="@Title"
@@ -35,8 +36,6 @@
     public static string Id => "drop-zone";
     public static string Title => "Drop zone";
 
-    [Inject] private NotificationService NotificationService { get; set; } = default!;
-
     private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
     private readonly IList<ClassB> classBItems = Utils.CreateItemList<ClassB>(5);
 
@@ -70,7 +69,7 @@
     <Sortable TItem=""object""
               Class=""drop-zone""
               Put=""SortablePutMode.Groups""
-              PutGroups=""@([DropItemsAGroup, DropItemsBGroup])""
+              PutGroups=""@([""drop-items-a"", ""drop-items-b""])""
               OnAdd=""OnDrop""
               GhostClass=""drop-zone-ghost"" />
 
@@ -81,9 +80,6 @@
 </div>
 
 @code {
-    private const string DropItemsAGroup = ""drop-items-a"";
-    private const string DropItemsBGroup = ""drop-items-b"";
-
     private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
     private readonly IList<ClassB> classBItems = Utils.CreateItemList<ClassB>(5);
 

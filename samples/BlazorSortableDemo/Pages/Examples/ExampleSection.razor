@@ -1,6 +1,19 @@
 <RadzenCard id="@Id">
     <RadzenStack>
-        <RadzenText Text="@Title" TextStyle="TextStyle.H5" />
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenText Text="@Title" TextStyle="TextStyle.H5" />
+
+            @if (ResetExample is not null)
+            {
+                <RadzenButton Icon="refresh"
+                              Text="Reset"
+                              Size="ButtonSize.Small"
+                              ButtonStyle="ButtonStyle.Secondary"
+                              Click="ResetExample" />
+            }
+        </RadzenStack>
 
         <RadzenTabs>
             <Tabs>
@@ -31,4 +44,7 @@
 
     [Parameter]
     public string? CodeContent { get; set; }
+
+    [CascadingParameter]
+    private Action? ResetExample { get; set; }
 }

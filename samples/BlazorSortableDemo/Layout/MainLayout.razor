@@ -1,30 +1,24 @@
 @inherits LayoutComponentBase
+@using BlazorSortableDemo.Pages.Examples
 
 <RadzenComponents />
 
 <RadzenLayout>
     <RadzenHeader>
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
-                <RadzenSidebarToggle Click="() => sidebarExpanded = !sidebarExpanded" />
-                <RadzenLabel Text="BlazorSortable Demo" />
-                <GitHubLink />
-            </RadzenStack>
-
-            <RadzenStack Orientation="Orientation.Horizontal"
-                         AlignItems="AlignItems.Center"
-                         Style="margin-left: auto;">
-                <RadzenAppearanceToggle title="Toggle theme" />
-            </RadzenStack>
+            <RadzenSidebarToggle Click="() => sidebarExpanded = !sidebarExpanded" />
+            <RadzenLabel Text="BlazorSortable Demo" />
+            <GitHubLink />
         </RadzenStack>
     </RadzenHeader>
 
-    <RadzenSidebar @bind-Expanded="sidebarExpanded" Style="width: fit-content;">
+    <RadzenSidebar @bind-Expanded="sidebarExpanded" Responsive="false">
         <RadzenPanelMenu>
             @foreach (var example in ExampleCatalog.All)
             {
                 <RadzenPanelMenuItem Text="@example.Title"
-                                     Path="@ExampleCatalog.GetPath(example.Id)" />
+                                     Path="@ExampleCatalog.GetPath(example.Id)"
+                                     Style="white-space: nowrap;" />
             }
         </RadzenPanelMenu>
     </RadzenSidebar>

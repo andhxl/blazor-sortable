@@ -1,3 +1,7 @@
+:root {
+    --rz-sidebar-width: 7rem;
+}
+
 .items-column {
     display: flex;
     flex-direction: column;
@@ -11,6 +15,8 @@
 .item {
     outline: 1px solid #808080;
     user-select: none;
+    white-space: nowrap;
+    overflow: auto;
 }
 
 .handle {

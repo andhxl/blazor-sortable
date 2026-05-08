@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace BlazorSortableDemo.Components.Examples;
+namespace BlazorSortableDemo.Pages.Examples;
 
 public static class ExampleCatalog
 {
