@@ -1,6 +1,7 @@
 using BlazorSortable.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace BlazorSortable;
 
@@ -32,6 +33,19 @@ public static class SortableServiceCollectionExtensions
 
         services.TryAddScoped<SortableRegistry>();
         services.Configure(configureOptions);
+
+        return services;
+    }
+
+    public static IServiceCollection AddSortable(
+        this IServiceCollection services,
+        SortableOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(options);
+
+        services.TryAddScoped<SortableRegistry>();
+        services.TryAddSingleton(Options.Create(options));
 
         return services;
     }

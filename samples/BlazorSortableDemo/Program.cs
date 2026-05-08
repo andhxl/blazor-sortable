@@ -1,5 +1,5 @@
 using BlazorSortable;
-using BlazorSortableSample;
+using BlazorSortableDemo;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Radzen;
@@ -12,6 +12,9 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 builder.Services.AddRadzenComponents();
 
-builder.Services.AddSortable();
+builder.Services.AddSortable(options =>
+{
+    options.Defaults.FallbackOnBody = true;
+});
 
 await builder.Build().RunAsync();

@@ -1,0 +1,29 @@
+@attribute [Route(ExampleCatalog.RouteTemplate)]
+
+@if (example is not null)
+{
+    <CascadingValue Value="ResetExample">
+        <ErrorBoundary @key="(Id, exampleInstanceKey)">
+            <DynamicComponent Type="@example.Value.Type" />
+        </ErrorBoundary>
+    </CascadingValue>
+}
+else
+{
+    <NotFound />
+}
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+
+    private (Type Type, string Id, string Title)? example;
+
+    protected override void OnParametersSet()
+    {
+        example = ExampleCatalog.Find(Id);
+    }
+
+    private object exampleInstanceKey = new();
+    private void ResetExample() => exampleInstanceKey = new();
+}

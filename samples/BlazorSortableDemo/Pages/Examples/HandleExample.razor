@@ -1,13 +1,15 @@
+@implements IExample
+
 <ExampleSection Id="@Id"
-                Title="Handle"
-                CodeContent="@codeContent">
-    <Sortable TItem="ClassA"
-              Items="classAItems"
+                Title="@Title"
+                CodeContent="@CodeContent">
+    <Sortable Items="classAItems"
               Class="items-column"
               Handle=".handle"
               ForceFallback="false">
         <RadzenCard class="item">
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center">
                 <div class="handle" />
                 @context
             </RadzenStack>
@@ -16,20 +18,23 @@
 </ExampleSection>
 
 @code {
-    [Parameter, EditorRequired]
-    public string Id { get; set; }
-
+    public static string Id => "handle";
+    public static string Title => "Handle";
+    
     private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
 
-    private string codeContent = @"
-<Sortable TItem=""ClassA""
-          Items=""classAItems""
+    private const string CodeContent = @"
+<Sortable Items=""classAItems""
           Class=""items-column""
           Handle="".handle""
           ForceFallback=""false"">
     <div class=""item item-with-handle"">
-        <div class=""handle"" />
+        <span class=""handle""></span>
         @context
     </div>
-</Sortable>";
+</Sortable>
+
+@code {
+    private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
+}";
 }

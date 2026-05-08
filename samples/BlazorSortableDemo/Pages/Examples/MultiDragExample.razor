@@ -1,0 +1,69 @@
+@implements IExample
+
+<ExampleSection Id="@Id"
+                Title="@Title"
+                CodeContent="@CodeContent">
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <Sortable Items="classAItems1"
+                  Class="items-column"
+                  MultiDrag="true"
+                  Group="multi-drag">
+            <RadzenCard class="item">
+                @context
+            </RadzenCard>
+        </Sortable>
+
+        <Sortable Items="classAItems2"
+                  Class="items-column"
+                  MultiDrag="true"
+                  Group="multi-drag">
+            <RadzenCard class="item">
+                @context
+            </RadzenCard>
+        </Sortable>
+
+        <Sortable Items="classAItems3"
+                  Class="items-column"
+                  MultiDrag="true"
+                  Group="multi-drag">
+            <RadzenCard class="item">
+                @context
+            </RadzenCard>
+        </Sortable>
+    </RadzenStack>
+</ExampleSection>
+
+@code {
+    public static string Id => "multi-drag";
+    public static string Title => "Multi drag";
+
+    private readonly IList<ClassA> classAItems1 = Utils.CreateItemList<ClassA>(5);
+    private readonly IList<ClassA> classAItems2 = Utils.CreateItemList<ClassA>(5, offset: 5);
+    private readonly IList<ClassA> classAItems3 = Utils.CreateItemList<ClassA>(5, offset: 10);
+
+    private const string CodeContent = @"
+<div class=""items-row"">
+    <Sortable Items=""classAItems1""
+              Class=""items-column""
+              MultiDrag=""true""
+              Group=""multi-drag"">
+        <div class=""item"">
+            @context
+        </div>
+    </Sortable>
+
+    <Sortable Items=""classAItems2""
+              Class=""items-column""
+              MultiDrag=""true""
+              Group=""multi-drag"">
+        <div class=""item"">
+            @context
+        </div>
+    </Sortable>
+</div>
+
+@code {
+    private readonly IList<ClassA> classAItems1 = Utils.CreateItemList<ClassA>(5);
+    private readonly IList<ClassA> classAItems2 = Utils.CreateItemList<ClassA>(5, offset: 5);
+}";
+}

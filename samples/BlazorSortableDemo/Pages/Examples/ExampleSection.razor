@@ -1,0 +1,50 @@
+<RadzenCard id="@Id">
+    <RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenText Text="@Title" TextStyle="TextStyle.H5" />
+
+            @if (ResetExample is not null)
+            {
+                <RadzenButton Icon="refresh"
+                              Text="Reset"
+                              Size="ButtonSize.Small"
+                              ButtonStyle="ButtonStyle.Secondary"
+                              Click="ResetExample" />
+            }
+        </RadzenStack>
+
+        <RadzenTabs>
+            <Tabs>
+                <RadzenTabsItem Text="View">
+                    @ChildContent
+                </RadzenTabsItem>
+
+                <RadzenTabsItem Text="Code">
+                    @if (!string.IsNullOrWhiteSpace(CodeContent))
+                    {
+                        <pre>@CodeContent.TrimStart()</pre>
+                    }
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Id { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; }
+
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string? CodeContent { get; set; }
+
+    [CascadingParameter]
+    private Action? ResetExample { get; set; }
+}

@@ -1,7 +1,5 @@
 const sortableJsPath = "_content/BlazorSortable/Sortable.min.js";
 const sortableJsVersion = "1.15.7";
-
-/** @type {Promise<void> | null} */
 let sortableJsLoadPromise = null;
 
 const stylesheetPath = "_content/BlazorSortable/blazor-sortable.css";
@@ -23,7 +21,7 @@ export async function initSortable(id, options, component, assetOptions) {
         ensureStylesheet(assetOptions.versionQuery);
     }
 
-    configureGroupCallbacks(options.group, component);
+    configureTransferCallbacks(options.group, component);
 
     el.blazorSortable = globalThis.Sortable.create(el, buildSortableOptions(options, component));
 }
@@ -36,6 +34,206 @@ export function destroySortable(id) {
 
     el.blazorSortable.destroy();
     delete el.blazorSortable;
+}
+
+function configureTransferCallbacks(group, component) {
+    if (group.pull === "function") {
+        group.pull = (to) => component.invokeMethod("OnPullJs", to.el.id);
+    }
+
+    if (group.put === "function") {
+        group.put = (_to, from) => component.invokeMethod("OnPutJs", from.el.id);
+    }
+}
+
+function buildSortableOptions(options, component) {
+    return {
+        ...options,
+        onStart: (evt) => {
+            component.invokeMethodAsync(
+                "OnStartJs",
+                evt.oldIndex,
+                getIndexes(evt.oldIndicies));
+        },
+        onEnd: () => {
+            component.invokeMethodAsync("OnEndJs");
+        },
+        onUpdate: (evt) => {
+            const isSwap = Boolean(evt.swapItem);
+
+            revertDomMove(evt, isSwap);
+
+            component.invokeMethodAsync(
+                "OnUpdateJs",
+                evt.oldIndex,
+                getIndexes(evt.oldIndicies),
+                evt.newIndex,
+                getIndexes(evt.newIndicies),
+                isSwap);
+        },
+        onAdd: (evt) => {
+            const isSwap = Boolean(evt.swapItem) && options.swap === true;
+
+            revertDomMove(evt, isSwap);
+
+            const isClone = isCloneMode(evt);
+
+            if (isClone) {
+                removeClone(evt);
+            }
+
+            component.invokeMethodAsync(
+                "OnAddJs",
+                evt.from.id,
+                evt.oldIndex,
+                getIndexes(evt.oldIndicies),
+                evt.newIndex,
+                getIndexes(evt.newIndicies),
+                isClone,
+                isSwap);
+        },
+        onRemove: (evt) => {
+            revertDomMove(evt, false);
+
+            const isClone = isCloneMode(evt);
+
+            if (isClone) {
+                removeClone(evt);
+            }
+
+            component.invokeMethodAsync(
+                "OnRemoveJs",
+                evt.oldIndex,
+                getIndexes(evt.oldIndicies),
+                evt.to.id,
+                evt.newIndex,
+                getIndexes(evt.newIndicies),
+                isClone);
+        },
+        onSelect: (evt) => {
+            keepSelectionInOneList(evt);
+
+            component.invokeMethodAsync(
+                "OnSelectJs",
+                getElementIndex(evt.from, evt.item),
+                getElementIndexes(evt.from, evt.items));
+        },
+        onDeselect: (evt) => {
+            component.invokeMethodAsync(
+                "OnDeselectJs",
+                getElementIndex(evt.from, evt.item),
+                getElementIndexes(evt.from, evt.items));
+        },
+        onSpill: (evt) => {
+            revertDomMove(evt, false);
+
+            const isClone = isCloneMode(evt);
+
+            if (isClone) {
+                removeClone(evt);
+            }
+
+            component.invokeMethodAsync(
+                "OnSpillJs",
+                getElementIndex(evt.from, evt.item),
+                getElementIndexes(evt.from, evt.items),
+                isClone);
+        }
+    };
+}
+
+function keepSelectionInOneList(evt) {
+    const foreignItem = evt.items.find(item => item.parentElement !== evt.from);
+
+    if (!foreignItem) {
+        return;
+    }
+
+    for (const item of evt.items) {
+        if (item !== evt.item) {
+            globalThis.Sortable.utils.deselect(item);
+        }
+    }
+
+    evt.items = [evt.item];
+}
+
+function getIndexes(indices) {
+    return indices?.map(x => x.index) ?? [];
+}
+
+function revertDomMove(evt, isSwap) {
+    if (isSwap) {
+        revertDomSwap(evt);
+        return;
+    }
+
+    const pairs = getMovedElementPairs(evt);
+
+    for (const pair of pairs) {
+        pair.element.remove();
+    }
+
+    for (const pair of pairs) {
+        const referenceItem = evt.from.children[pair.oldIndex] ?? null;
+        evt.from.insertBefore(pair.element, referenceItem);
+    }
+}
+
+function revertDomSwap(evt) {
+    const pairs = getMovedElementPairs(evt);
+
+    for (const pair of pairs) {
+        pair.element.remove();
+    }
+
+    evt.swapItem.remove();
+
+    for (const pair of pairs) {
+        const referenceItem = evt.from.children[pair.oldIndex] ?? null;
+        evt.from.insertBefore(pair.element, referenceItem);
+    }
+
+    const swapReferenceItem = evt.to.children[evt.newIndex] ?? null;
+    evt.to.insertBefore(evt.swapItem, swapReferenceItem);
+}
+
+function getMovedElementPairs(evt) {
+    if (evt.oldIndicies?.length > 0) {
+        return evt.oldIndicies.map(x => ({
+            element: x.multiDragElement,
+            oldIndex: x.index
+        }));
+    }
+
+    return [{
+        element: evt.item,
+        oldIndex: evt.oldIndex
+    }];
+}
+
+function isCloneMode(evt) {
+    return evt.pullMode === "clone";
+}
+
+function removeClone(evt) {
+    if (evt.clones?.length > 0) {
+        for (const clone of evt.clones) {
+            clone.remove();
+        }
+
+        return;
+    }
+
+    evt.clone?.remove();
+}
+
+function getElementIndex(parent, element) {
+    return Array.prototype.indexOf.call(parent.children, element);
+}
+
+function getElementIndexes(parent, elements) {
+    return elements?.map(x => getElementIndex(parent, x)) ?? [];
 }
 
 async function ensureSortableJs() {
@@ -103,73 +301,11 @@ function getHeadStylesheetLinks() {
 }
 
 function insertHeadStylesheetLink(stylesheetLinks, link) {
-    const lastStylesheetLink = stylesheetLinks[stylesheetLinks.length - 1];
+    const firstStylesheetLink = stylesheetLinks[0];
 
-    if (lastStylesheetLink) {
-        lastStylesheetLink.after(link);
+    if (firstStylesheetLink) {
+        firstStylesheetLink.before(link);
     } else {
         document.head.appendChild(link);
     }
-}
-
-function configureGroupCallbacks(group, component) {
-    if (group.pull === "function") {
-        group.pull = (to) => component.invokeMethod("OnPullJs", to.el.id);
-    }
-
-    if (group.put === "function") {
-        group.put = (_to, from) => component.invokeMethod("OnPutJs", from.el.id);
-    }
-}
-
-function buildSortableOptions(options, component) {
-    return {
-        ...options,
-        onStart: (evt) => {
-            component.invokeMethodAsync("OnStartJs", evt.oldIndex);
-        },
-        onEnd: () => {
-            component.invokeMethodAsync("OnEndJs");
-        },
-        onUpdate: (evt) => {
-            revertDomMove(evt);
-
-            component.invokeMethodAsync("OnUpdateJs", evt.oldIndex, evt.newIndex);
-        },
-        onAdd: (evt) => {
-            revertDomMove(evt);
-
-            const isClone = isCloneMode(evt);
-
-            if (isClone) {
-                evt.clone.remove();
-            }
-
-            component.invokeMethodAsync("OnAddJs", evt.from.id, evt.oldIndex, evt.newIndex, isClone);
-        },
-        onRemove: (evt) => {
-            revertDomMove(evt);
-
-            if (isCloneMode(evt)) {
-                evt.clone.remove();
-            } else {
-                component.invokeMethodAsync("OnRemoveJs", evt.oldIndex, evt.to.id, evt.newIndex);
-            }
-        }
-    };
-}
-
-function revertDomMove(evt) {
-    const item = evt.item;
-    const from = evt.from;
-    const oldIndex = evt.oldIndex;
-
-    item.remove();
-
-    const referenceItem = from.children[oldIndex] ?? null;
-    from.insertBefore(item, referenceItem);
-}
-
-function isCloneMode(evt) {
-    return evt.pullMode === "clone";
 }

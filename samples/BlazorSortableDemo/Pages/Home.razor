@@ -1,0 +1,10 @@
+@page "/"
+@using BlazorSortableDemo.Pages.Examples
+@inject NavigationManager Navigation
+
+@code {
+    protected override void OnInitialized()
+    {
+        Navigation.NavigateTo(ExampleCatalog.GetPath(ExampleCatalog.All[0].Id), replace: true);
+    }
+}

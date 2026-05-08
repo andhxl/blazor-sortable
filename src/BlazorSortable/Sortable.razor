@@ -8,10 +8,18 @@
     {
         @foreach (var item in Items)
         {
-            <div @key="@(KeySelector?.Invoke(item) ?? item)"
-                 class="@(DraggableSelector?.Invoke(item) == true ? DraggableClass : null)">
-                @ChildContent(item)
-            </div>
+            if (UseItemKeys)
+            {
+                <div @key="GetItemKey(item)" class="@GetItemClass(item)">
+                    @ChildContent(item)
+                </div>
+            }
+            else
+            {
+                <div class="@GetItemClass(item)">
+                    @ChildContent(item)
+                </div>
+            }
         }
     }
 </div>

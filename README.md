@@ -85,6 +85,16 @@ The bundled stylesheet contains only the default helper styles used by BlazorSor
 .sortable-fallback {
     opacity: 1 !important;
 }
+
+.sortable-selected {
+    outline: var(--blazor-sortable-selected-outline-width, 2px) solid var(--blazor-sortable-selected-outline-color, Highlight);
+    outline-offset: calc(-1 * var(--blazor-sortable-selected-outline-width, 2px));
+}
+
+.sortable-swap-highlight {
+    outline: var(--blazor-sortable-swap-highlight-outline-width, 2px) solid var(--blazor-sortable-swap-highlight-outline-color, Highlight);
+    outline-offset: calc(-1 * var(--blazor-sortable-swap-highlight-outline-width, 2px));
+}
 ```
 
 You can disable it with `AutoLoadStylesheet = false` if you want to provide these styles yourself.
@@ -157,8 +167,6 @@ You can disable it with `AutoLoadStylesheet = false` if you want to provide thes
 
 ### Sortable
 
-> **Note:** MultiDrag and Swap plugin options are not currently supported by the component, but may be considered for a future release.
-
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `TItem` | `notnull` | - | Type of items displayed, sorted, or accepted by the component |
@@ -180,9 +188,9 @@ You can disable it with `AutoLoadStylesheet = false` if you want to provide thes
 | `PutFunction` | `Predicate<SortableTransferContext<object>>?` | `null` | **Required when `Put="SortablePutMode.Function"`.** Function to determine whether an item can be accepted by this Sortable component. **Works only when the component runs on WebAssembly.** |
 | `ConvertFunction` | `Func<SortableTransferContext<object>, TItem?>?` | `null` | Converts incoming items that are not assignable to the target item type. Return `null` when conversion is not possible |
 | `Sort` | `bool` | `true` | Enables or disables sorting within this Sortable component |
-| `Delay` | `int` | `0` | Time in milliseconds to define when sorting should start. Unfortunately, due to browser restrictions, delaying is not possible on IE or Edge with native drag and drop |
-| `DelayOnTouchOnly` | `bool` | `false` | Whether the delay should be applied only when the user is using touch, e.g. on a mobile device. No delay will be applied in any other case |
-| `TouchStartThreshold` | `int` | `0` | Minimum pointer movement that must occur before delayed sorting is cancelled. Values between `3` and `5` are good |
+| `Delay` | `int` | `150` | Time in milliseconds to define when sorting should start. Unfortunately, due to browser restrictions, delaying is not possible on IE or Edge with native drag and drop |
+| `DelayOnTouchOnly` | `bool` | `true` | Whether the delay should be applied only when the user is using touch, e.g. on a mobile device. No delay will be applied in any other case |
+| `TouchStartThreshold` | `int` | `4` | Minimum pointer movement that must occur before delayed sorting is cancelled. Values between `3` and `5` are good |
 | `Disabled` | `bool` | `false` | Disables the Sortable component when set to true |
 | `Animation` | `int` | `150` | Animation duration in milliseconds |
 | `Handle` | `string?` | `null` | CSS selector for elements that can be dragged, e.g. `.my-handle` |

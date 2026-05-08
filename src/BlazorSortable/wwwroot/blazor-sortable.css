@@ -5,3 +5,25 @@
 .sortable-fallback {
     opacity: 1 !important;
 }
+
+.sortable-selected {
+    filter: var(
+        --blazor-sortable-selected-filter,
+        drop-shadow(
+            0 0
+            var(--blazor-sortable-selected-glow-size, 4px)
+            var(--blazor-sortable-selected-glow-color, Highlight)
+        )
+    );
+}
+
+.sortable-swap-highlight {
+    filter: var(
+        --blazor-sortable-swap-highlight-filter,
+        drop-shadow(
+            0 0
+            var(--blazor-sortable-swap-highlight-glow-size, 4px)
+            var(--blazor-sortable-swap-highlight-glow-color, Highlight)
+        )
+    );
+}
