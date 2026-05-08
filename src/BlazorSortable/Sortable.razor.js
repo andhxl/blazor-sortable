@@ -111,6 +111,8 @@ function buildSortableOptions(options, component) {
                 isClone);
         },
         onSelect: (evt) => {
+            keepSelectionInOneList(evt);
+
             component.invokeMethodAsync(
                 "OnSelectJs",
                 getElementIndex(evt.from, evt.item),
@@ -138,6 +140,22 @@ function buildSortableOptions(options, component) {
                 isClone);
         }
     };
+}
+
+function keepSelectionInOneList(evt) {
+    const foreignItem = evt.items.find(item => item.parentElement !== evt.from);
+
+    if (!foreignItem) {
+        return;
+    }
+
+    for (const item of evt.items) {
+        if (item !== evt.item) {
+            globalThis.Sortable.utils.deselect(item);
+        }
+    }
+
+    evt.items = [evt.item];
 }
 
 function getIndexes(indices) {
