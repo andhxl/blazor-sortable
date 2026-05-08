@@ -50,13 +50,13 @@ function buildSortableOptions(options, component) {
     return {
         ...options,
         onStart: (evt) => {
-            component.invokeMethod(
+            component.invokeMethodAsync(
                 "OnStartJs",
                 evt.oldIndex,
                 getIndexes(evt.oldIndicies));
         },
         onEnd: () => {
-            component.invokeMethod("OnEndJs");
+            component.invokeMethodAsync("OnEndJs");
         },
         onUpdate: (evt) => {
             const isSwap = Boolean(evt.swapItem);
