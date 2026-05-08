@@ -18,7 +18,7 @@ public sealed class SortableDefaultOptions
     /// <summary>
     /// Minimum pointer movement, in pixels, before fallback dragging starts.
     /// </summary>
-    public int FallbackTolerance { get; set; }
+    public int FallbackTolerance { get; set; } = 3;
 
     /// <summary>
     /// Animation duration in milliseconds.
@@ -28,17 +28,17 @@ public sealed class SortableDefaultOptions
     /// <summary>
     /// Time in milliseconds before sorting starts.
     /// </summary>
-    public int Delay { get; set; }
+    public int Delay { get; set; } = 150;
 
     /// <summary>
     /// Applies <see cref="Delay"/> only for touch input.
     /// </summary>
-    public bool DelayOnTouchOnly { get; set; }
+    public bool DelayOnTouchOnly { get; set; } = true;
 
     /// <summary>
     /// Minimum touch movement, in pixels, before delayed sorting is cancelled.
     /// </summary>
-    public int TouchStartThreshold { get; set; }
+    public int TouchStartThreshold { get; set; } = 4;
 
     /// <summary>
     /// Enables automatic scrolling while dragging near scroll container edges.
