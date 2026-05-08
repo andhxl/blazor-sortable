@@ -2,8 +2,8 @@
 
 @if (example is not null)
 {
-    <CascadingValue Value="ResetExample">
-        <ErrorBoundary @key="(Id, exampleInstanceKey)">
+    <CascadingValue Value="ResetExample" IsFixed="true">
+        <ErrorBoundary @key="(Id, resetToken)">
             <DynamicComponent Type="@example.Value.Type" />
         </ErrorBoundary>
     </CascadingValue>
@@ -24,6 +24,7 @@ else
         example = ExampleCatalog.Find(Id);
     }
 
-    private object exampleInstanceKey = new();
-    private void ResetExample() => exampleInstanceKey = new();
+    private int resetToken;
+
+    private void ResetExample() => resetToken++;
 }
