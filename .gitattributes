@@ -13,7 +13,11 @@
 *.cs     text diff=csharp
 *.cshtml text diff=html
 *.csx    text diff=csharp
+*.razor  text diff=html
+*.js     text
+*.css    text
 *.sln    text eol=crlf
+*.slnx   text eol=crlf
 
 # Content below from: https://github.com/gitattributes/gitattributes/blob/master/Common.gitattributes
 

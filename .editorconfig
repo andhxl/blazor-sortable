@@ -99,6 +99,7 @@ dotnet_diagnostic.IDE0005.severity = warning
 dotnet_diagnostic.IDE0040.severity = warning
 dotnet_diagnostic.IDE0044.severity = warning
 dotnet_diagnostic.IDE0060.severity = warning
+dotnet_diagnostic.IDE0220.severity = none
 dotnet_diagnostic.IDE0305.severity = none
 
 #### .NET Coding Conventions ####
