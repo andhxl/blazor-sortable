@@ -1,38 +1,31 @@
 @implements IExample
 
-<ExampleSection Id="@Id"
-                Title="@Title"
-                CodeContent="@CodeContent">
-    <RadzenStack Orientation="Orientation.Horizontal">
-        <Sortable Items="classAItems"
-                  Class="items-column"
-                  Pull="SortablePullMode.Clone"
-                  CloneFunction="i => new() { Value = i.Value }"
-                  GhostClass="clone-ghost"
-                  RevertOnSpill="true"
-                  Sort="false">
-            <RadzenCard class="item">
-                @context
-            </RadzenCard>
-        </Sortable>
+<RadzenStack Orientation="Orientation.Horizontal">
+    <Sortable Items="classAItems"
+              Class="items-column"
+              Pull="SortablePullMode.Clone"
+              CloneFunction="i => new() { Value = i.Value }"
+              GhostClass="clone-ghost"
+              RevertOnSpill="true"
+              Sort="false">
+        <RadzenCard class="item">
+            @context
+        </RadzenCard>
+    </Sortable>
 
-        <Sortable Items="classBItems"
-                  Class="items-column"
-                  Put="SortablePutMode.Function"
-                  PutFunction="c => c.Item is ClassA i && i.Value < 4"
-                  ConvertFunction="TryConvertToClassB"
-                  InvertSwap="true">
-            <RadzenCard class="item">
-                @context
-            </RadzenCard>
-        </Sortable>
-    </RadzenStack>
-</ExampleSection>
+    <Sortable Items="classBItems"
+              Class="items-column"
+              Put="SortablePutMode.Function"
+              PutFunction="c => c.Item is ClassA i && i.Value < 4"
+              ConvertFunction="TryConvertToClassB"
+              InvertSwap="true">
+        <RadzenCard class="item">
+            @context
+        </RadzenCard>
+    </Sortable>
+</RadzenStack>
 
 @code {
-    public static string Id => "advanced";
-    public static string Title => "Advanced";
-
     private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
     private readonly IList<ClassB> classBItems = Utils.CreateItemList<ClassB>(5);
 
@@ -53,8 +46,11 @@
         return false;
     }
 
-    private const string CodeContent = @"
-<div class=""items-row"">
+    public static string Id => "advanced";
+    public static string Title => "Advanced";
+
+    public static string Code => @"
+<div class=""row"">
     <Sortable Items=""classAItems""
               Class=""items-column""
               Pull=""SortablePullMode.Clone""
@@ -81,7 +77,7 @@
 
 @code {
     private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
-    private readonly IList<ClassB> classBItems = Utils.CreateItemList<ClassB>(5, 6);
+    private readonly IList<ClassB> classBItems = Utils.CreateItemList<ClassB>(5);
 
     private bool TryConvertToClassB(SortableTransferContext<object> context, out ClassB item)
     {
@@ -99,5 +95,6 @@
         item = default!;
         return false;
     }
-}";
+}
+";
 }

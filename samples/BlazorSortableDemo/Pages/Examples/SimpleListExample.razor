@@ -1,23 +1,19 @@
 @implements IExample
 
-<ExampleSection Id="@Id"
-                Title="@Title"
-                CodeContent="@CodeContent">
-    <Sortable Items="classAItems"
-              Class="items-column">
-        <RadzenCard class="item">
-            @context
-        </RadzenCard>
-    </Sortable>
-</ExampleSection>
+<Sortable Items="classAItems"
+          Class="items-column">
+    <RadzenCard class="item">
+        @context
+    </RadzenCard>
+</Sortable>
 
 @code {
+    private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
+
     public static string Id => "simple-list";
     public static string Title => "Simple list";
 
-    private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
-
-    private const string CodeContent = @"
+    public static string Code => @"
 <Sortable Items=""classAItems""
           Class=""items-column"">
     <div class=""item"">
@@ -27,5 +23,6 @@
 
 @code {
     private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
-}";
+}
+";
 }

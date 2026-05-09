@@ -9,7 +9,7 @@ public static class ExampleCatalog
     public static string GetPath(string id) =>
         RouteTemplate.Replace("{Id}", id);
 
-    public static readonly (Type Type, string Id, string Title)[] All =
+    public static readonly ExampleDefinition[] All =
     [
         Example<SimpleListExample>(),
         Example<HandleExample>(),
@@ -20,10 +20,9 @@ public static class ExampleCatalog
         Example<DropZoneExample>(),
     ];
 
-    public static (Type Type, string Id, string Title)? Find(string? id)
+    public static ExampleDefinition? Find(string? id)
     {
-        if (id is null)
-            return null;
+        if (id is null) return null;
 
         foreach (var example in All)
         {
@@ -34,9 +33,9 @@ public static class ExampleCatalog
         return null;
     }
 
-    private static (Type Type, string Id, string Title) Example<T>()
+    private static ExampleDefinition Example<T>()
         where T : IComponent, IExample
     {
-        return (typeof(T), T.Id, T.Title);
+        return new(typeof(T), T.Id, T.Title, T.Code);
     }
 }

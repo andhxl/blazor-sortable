@@ -2,11 +2,13 @@
 
 @if (example is not null)
 {
-    <CascadingValue Value="ResetExample" IsFixed="true">
-        <ErrorBoundary @key="(Id, resetToken)">
-            <DynamicComponent Type="@example.Value.Type" />
+    <ExampleSection Title="@example.Title"
+                    Code="@example.Code"
+                    Reset="ResetExample">
+        <ErrorBoundary @key="(example.Id, resetToken)">
+            <DynamicComponent Type="example.Type" />
         </ErrorBoundary>
-    </CascadingValue>
+    </ExampleSection>
 }
 else
 {
@@ -17,7 +19,7 @@ else
     [Parameter]
     public string? Id { get; set; }
 
-    private (Type Type, string Id, string Title)? example;
+    private ExampleDefinition? example;
 
     protected override void OnParametersSet()
     {
@@ -25,6 +27,5 @@ else
     }
 
     private int resetToken;
-
     private void ResetExample() => resetToken++;
 }

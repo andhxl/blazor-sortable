@@ -1,41 +1,34 @@
 @implements IExample
 @inject NotificationService NotificationService
 
-<ExampleSection Id="@Id"
-                Title="@Title"
-                CodeContent="@CodeContent">
-    <RadzenStack>
-        <RadzenStack Orientation="Orientation.Horizontal">
-            <Sortable Items="classAItems"
-                      Class="items-column"
-                      Group="drop-items-a">
-                <RadzenCard class="item">
-                    @context
-                </RadzenCard>
-            </Sortable>
+<RadzenStack>
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <Sortable Items="classAItems"
+                  Class="items-column"
+                  Group="drop-items-a">
+            <RadzenCard class="item">
+                @context
+            </RadzenCard>
+        </Sortable>
 
-            <Sortable Items="classBItems"
-                      Class="items-column"
-                      Group="drop-items-b">
-                <RadzenCard class="item">
-                    @context
-                </RadzenCard>
-            </Sortable>
-        </RadzenStack>
-
-        <Sortable TItem="object"
-                  Class="drop-zone"
-                  Put="SortablePutMode.Groups"
-                  PutGroups="@(["drop-items-a", "drop-items-b"])"
-                  OnAdd="OnDrop"
-                  GhostClass="drop-zone-ghost" />
+        <Sortable Items="classBItems"
+                  Class="items-column"
+                  Group="drop-items-b">
+            <RadzenCard class="item">
+                @context
+            </RadzenCard>
+        </Sortable>
     </RadzenStack>
-</ExampleSection>
+
+    <Sortable TItem="object"
+              Class="drop-zone"
+              Put="SortablePutMode.Groups"
+              PutGroups="@(["drop-items-a", "drop-items-b"])"
+              OnAdd="OnDrop"
+              GhostClass="drop-zone-ghost" />
+</RadzenStack>
 
 @code {
-    public static string Id => "drop-zone";
-    public static string Title => "Drop zone";
-
     private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
     private readonly IList<ClassB> classBItems = Utils.CreateItemList<ClassB>(5);
 
@@ -43,12 +36,15 @@
     {
         NotificationService.Notify(
             summary: "Item dropped",
-            detail: args.Item?.ToString() ?? "Unknown item");
+            detail: args.Item.ToString() ?? "Unknown item");
     }
 
-    private const string CodeContent = @"
-<div class=""drop-zone-example"">
-    <div class=""items-row"">
+    public static string Id => "drop-zone";
+    public static string Title => "Drop zone";
+
+    public static string Code => @"
+<div class=""column"">
+    <div class=""row"">
         <Sortable Items=""classAItems""
                   Class=""items-column""
                   Group=""drop-items-a"">
@@ -87,7 +83,8 @@
 
     private void OnDrop(SortableEventArgs<object> args)
     {
-        droppedItem = args.Item?.ToString() ?? ""Unknown item"";
+        droppedItem = args.Item.ToString() ?? ""Unknown item"";
     }
-}";
+}
+";
 }

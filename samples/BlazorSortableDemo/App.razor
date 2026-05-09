@@ -1,6 +1,9 @@
 <HeadContent>
-    <link rel="stylesheet" href="css/site.css?v=@(typeof(App).Assembly.GetName().Version)" />
+    <link rel="stylesheet" href="css/site.css?v=@appVersion" />
+    <link rel="stylesheet" href="css/examples.css?v=@appVersion" />
 </HeadContent>
+
+<RadzenComponents />
 
 <Router AppAssembly="typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
@@ -9,4 +12,12 @@
     </Found>
 </Router>
 
-<script src="_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"></script>
+<script src="_content/Radzen.Blazor/Radzen.Blazor.js?v=@radzenVersion"></script>
+
+@code {
+    private static readonly string appVersion =
+        typeof(App).Assembly.GetName().Version!.ToString(3);
+
+    private static readonly string radzenVersion =
+        typeof(Radzen.Colors).Assembly.GetName().Version!.ToString(3);
+}

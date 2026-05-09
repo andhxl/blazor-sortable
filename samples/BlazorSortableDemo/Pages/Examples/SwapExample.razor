@@ -1,38 +1,34 @@
 @implements IExample
 
-<ExampleSection Id="@Id"
-                Title="@Title"
-                CodeContent="@CodeContent">
-    <RadzenStack Orientation="Orientation.Horizontal">
-        <Sortable Items="classAItems1"
-                  Class="items-column"
-                  Swap="true"
-                  Group="swap">
-            <RadzenCard class="item">
-                @context
-            </RadzenCard>
-        </Sortable>
+<RadzenStack Orientation="Orientation.Horizontal">
+    <Sortable Items="classAItems1"
+              Class="items-column"
+              Swap="true"
+              Group="swap">
+        <RadzenCard class="item">
+            @context
+        </RadzenCard>
+    </Sortable>
 
-        <Sortable Items="classAItems2"
-                  Class="items-column"
-                  Swap="true"
-                  Group="swap">
-            <RadzenCard class="item">
-                @context
-            </RadzenCard>
-        </Sortable>
-    </RadzenStack>
-</ExampleSection>
+    <Sortable Items="classAItems2"
+              Class="items-column"
+              Swap="true"
+              Group="swap">
+        <RadzenCard class="item">
+            @context
+        </RadzenCard>
+    </Sortable>
+</RadzenStack>
 
 @code {
-    public static string Id => "swap";
-    public static string Title => "Swap";
-
     private readonly IList<ClassA> classAItems1 = Utils.CreateItemList<ClassA>(5);
     private readonly IList<ClassA> classAItems2 = Utils.CreateItemList<ClassA>(5, offset: 5);
 
-    private const string CodeContent = @"
-<div class=""items-row"">
+    public static string Id => "swap";
+    public static string Title => "Swap";
+
+    public static string Code => @"
+<div class=""row"">
     <Sortable Items=""classAItems1""
               Class=""items-column""
               Swap=""true""
@@ -55,5 +51,6 @@
 @code {
     private readonly IList<ClassA> classAItems1 = Utils.CreateItemList<ClassA>(5);
     private readonly IList<ClassA> classAItems2 = Utils.CreateItemList<ClassA>(5, offset: 5);
-}";
+}
+";
 }

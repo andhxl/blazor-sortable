@@ -1,3 +1,3 @@
 namespace BlazorSortableDemo.Pages.Examples.Data;
 
-public record ClassA : ClassBase;
+public sealed record ClassA : ClassBase;
