@@ -463,7 +463,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         }
 
         jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import",
-            "./_content/BlazorSortable/Sortable.razor.js" + AssemblyVersionQuery.Value);
+            $"./_content/BlazorSortable/Sortable.razor.js?v={AssemblyVersion.Value}");
 
         selfReference = DotNetObjectReference.Create(this);
 
@@ -475,7 +475,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             {
                 autoLoadSortableJs = Options.Value.AutoLoadSortableJs,
                 autoLoadStylesheet = Options.Value.AutoLoadStylesheet,
-                versionQuery = AssemblyVersionQuery.Value
+                version = AssemblyVersion.Value
             });
 
         SortableRegistry.Register(Id, this);

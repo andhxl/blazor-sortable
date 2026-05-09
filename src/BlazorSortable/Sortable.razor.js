@@ -18,7 +18,7 @@ export async function initSortable(id, options, component, assetOptions) {
     }
 
     if (assetOptions.autoLoadStylesheet) {
-        ensureStylesheet(assetOptions.versionQuery);
+        ensureStylesheet(assetOptions.version);
     }
 
     configureTransferCallbacks(options.group, component);
@@ -276,7 +276,7 @@ function isSortableJsAvailable() {
     return typeof globalThis.Sortable === "function";
 }
 
-function ensureStylesheet(versionQuery) {
+function ensureStylesheet(version) {
     if (stylesheetInjected) {
         return;
     }
@@ -290,7 +290,7 @@ function ensureStylesheet(versionQuery) {
 
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = stylesheetPath + versionQuery;
+    link.href = `${stylesheetPath}?v=${version}`;
 
     insertHeadStylesheetLink(stylesheetLinks, link);
     stylesheetInjected = true;

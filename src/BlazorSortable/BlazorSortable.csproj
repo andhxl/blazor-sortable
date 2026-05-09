@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
+    <Version>8.0.0</Version>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <GeneratePackageOnBuild Condition="$(Configuration) == 'Release'">true</GeneratePackageOnBuild>
-    <Version>8.0.0</Version>
+    <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <Authors>andhxl</Authors>
     <Description>A Blazor component that wraps SortableJS, a JavaScript library for reorderable drag-and-drop lists.</Description>
     <Copyright>© 2025-$([System.DateTime]::Now.Year) $(Authors)</Copyright>
@@ -15,7 +15,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>blazor;sortablejs;sortable;reorder;drag;drag-and-drop</PackageTags>
-    <PackageReleaseNotes>Breaking changes: ConvertFunction behavior changed and static asset paths changed. See CHANGELOG.md for migration details.</PackageReleaseNotes>
+    <PackageReleaseNotes>Breaking changes. See CHANGELOG.md for migration details.</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/andhxl/blazor-sortable</RepositoryUrl>
   </PropertyGroup>
 
