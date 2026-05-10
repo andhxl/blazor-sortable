@@ -8,9 +8,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <Authors>andhxl</Authors>
     <Description>A Blazor component that wraps SortableJS, a JavaScript library for reorderable drag-and-drop lists.</Description>
-    <Copyright>© 2025-$([System.DateTime]::Now.Year) $(Authors)</Copyright>
+    <CopyrightYear>2025</CopyrightYear>
+    <CurrentYear>$([System.DateTime]::Now.Year)</CurrentYear>
+    <CopyrightYearRange Condition="'$(CopyrightYear)' == '$(CurrentYear)'">$(CopyrightYear)</CopyrightYearRange>
+    <CopyrightYearRange Condition="'$(CopyrightYear)' != '$(CurrentYear)'">$(CopyrightYear)-$(CurrentYear)</CopyrightYearRange>
+    <Copyright>© $(CopyrightYearRange) $(Authors)</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://andhxl.github.io/blazor-sortable/</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
