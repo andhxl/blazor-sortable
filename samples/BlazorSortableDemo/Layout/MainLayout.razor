@@ -10,13 +10,14 @@
         </RadzenStack>
     </RadzenHeader>
 
-    <RadzenSidebar @bind-Expanded="sidebarExpanded" Responsive="false">
+    <RadzenSidebar @bind-Expanded="sidebarExpanded"
+                   Responsive="false"
+                   Style="width: max-content">
         <RadzenPanelMenu>
             @foreach (var example in ExampleCatalog.All)
             {
                 <RadzenPanelMenuItem Text="@example.Title"
-                                     Path="@ExampleCatalog.GetPath(example.Id)"
-                                     Style="white-space: nowrap;" />
+                                     Path="@ExampleCatalog.GetPath(example.Id)" />
             }
         </RadzenPanelMenu>
     </RadzenSidebar>
