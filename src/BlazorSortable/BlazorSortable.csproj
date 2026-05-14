@@ -23,7 +23,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>blazor;sortablejs;sortable;reorder;drag;drag-and-drop</PackageTags>
-    <PackageReleaseNotes>Breaking changes. See CHANGELOG.md for migration details.</PackageReleaseNotes>
+    <PackageReleaseNotes>Major release with breaking changes. See CHANGELOG.md.</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/andhxl/blazor-sortable</RepositoryUrl>
   </PropertyGroup>
 

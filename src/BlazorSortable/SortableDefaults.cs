@@ -3,7 +3,7 @@ namespace BlazorSortable;
 /// <summary>
 /// Provides default behavior options for Sortable components.
 /// </summary>
-public sealed class SortableDefaultOptions
+public sealed class SortableDefaults
 {
     /// <summary>
     /// Forces SortableJS to use fallback drag behavior instead of native HTML5 drag and drop.

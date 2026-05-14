@@ -382,6 +382,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     [Parameter]
     public EventCallback<SortableEventArgs<TItem>> OnRemove { get; set; }
 
+    [Parameter]
+    public EventCallback<SortableEventArgs<TItem>> OnChange { get; set; }
+
     /// <summary>
     /// Event that occurs when an item is selected in multi-drag mode.
     /// </summary>
@@ -579,24 +582,26 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         return options;
     }
 
-    private object? GetPull() => Pull switch
-    {
-        SortablePullMode.True => true,
-        SortablePullMode.False => false,
-        SortablePullMode.Groups => PullGroups,
-        SortablePullMode.Clone => "clone",
-        SortablePullMode.Function => "function",
-        _ => null
-    };
+    private object? GetPull() =>
+        Pull switch
+        {
+            SortablePullMode.True => true,
+            SortablePullMode.False => false,
+            SortablePullMode.Groups => PullGroups,
+            SortablePullMode.Clone => "clone",
+            SortablePullMode.Function => "function",
+            _ => null
+        };
 
-    private object? GetPut() => Put switch
-    {
-        SortablePutMode.True => true,
-        SortablePutMode.False => false,
-        SortablePutMode.Groups => PutGroups,
-        SortablePutMode.Function => "function",
-        _ => null
-    };
+    private object? GetPut() =>
+        Put switch
+        {
+            SortablePutMode.True => true,
+            SortablePutMode.False => false,
+            SortablePutMode.Groups => PutGroups,
+            SortablePutMode.Function => "function",
+            _ => null
+        };
 
 #pragma warning disable CS1591, IDE1006
 
@@ -684,12 +689,19 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
         try
         {
-            if (OnUpdate.HasDelegate)
+            if (OnUpdate.HasDelegate || OnChange.HasDelegate)
             {
                 var info = CreateInfo(this);
 
-                await OnUpdate.InvokeAsync(new(SortableChangeOperation.Update,
-                    item, items, info, oldIndex, oldIndexes, info, newIndex, newIndexes, false, isSwap));
+                var args = new SortableEventArgs<TItem>(
+                    SortableChangeOperation.Update,
+                    item, items, info, oldIndex, oldIndexes, info, newIndex, newIndexes, false, isSwap);
+
+                if (OnUpdate.HasDelegate)
+                    await OnUpdate.InvokeAsync(args);
+
+                if (OnChange.HasDelegate)
+                    await OnChange.InvokeAsync(args);
             }
         }
         finally
@@ -738,8 +750,6 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         {
             if (isMultiDragOperation)
             {
-                // SortableJS MultiDrag reports new indexes in ascending order.
-                // Insert in that order so each item lands at its reported final index.
                 for (var i = 0; i < oldIndexes.Length; i++)
                     Items.Insert(newIndexes[i], convertedByOldIndex[oldIndexes[i]]);
             }
@@ -764,13 +774,20 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
         try
         {
-            if (OnAdd.HasDelegate)
+            if (OnAdd.HasDelegate || OnChange.HasDelegate)
             {
                 var item = convertedByOldIndex[oldIndex];
                 var items = oldIndexes.Select(i => convertedByOldIndex[i]).ToArray();
 
-                await OnAdd.InvokeAsync(new(SortableChangeOperation.Add,
-                    item, items, fromInfo, oldIndex, oldIndexes, toInfo, newIndex, newIndexes, isClone, isSwap));
+                var args = new SortableEventArgs<TItem>(
+                    SortableChangeOperation.Add,
+                    item, items, fromInfo, oldIndex, oldIndexes, toInfo, newIndex, newIndexes, isClone, isSwap);
+
+                if (OnAdd.HasDelegate)
+                    await OnAdd.InvokeAsync(args);
+
+                if (OnChange.HasDelegate)
+                    await OnChange.InvokeAsync(args);
             }
         }
         finally
@@ -821,8 +838,6 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         }
         else if (isMultiDragOperation)
         {
-            // SortableJS MultiDrag reports old indexes in ascending order.
-            // Remove from the end so earlier removals do not shift later indexes.
             for (var i = oldIndexes.Length - 1; i >= 0; i--)
                 Items.RemoveAt(oldIndexes[i]);
         }
@@ -833,13 +848,20 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
         try
         {
-            if (OnRemove.HasDelegate)
+            if (OnRemove.HasDelegate || OnChange.HasDelegate)
             {
-                var from = CreateInfo(this);
-                var to = CreateInfo(SortableRegistry[toId]);
+                var fromInfo = CreateInfo(this);
+                var toInfo = CreateInfo(SortableRegistry[toId]);
 
-                await OnRemove.InvokeAsync(new(SortableChangeOperation.Remove,
-                    item, items, from, oldIndex, oldIndexes, to, newIndex, newIndexes, isClone, isSwap));
+                var args = new SortableEventArgs<TItem>(
+                    SortableChangeOperation.Remove,
+                    item, items, fromInfo, oldIndex, oldIndexes, toInfo, newIndex, newIndexes, isClone, isSwap);
+
+                if (OnRemove.HasDelegate)
+                    await OnRemove.InvokeAsync(args);
+
+                if (OnChange.HasDelegate)
+                    await OnChange.InvokeAsync(args);
             }
         }
         finally

@@ -24,5 +24,5 @@ public sealed class SortableOptions
     /// <summary>
     /// Gets the default Sortable component behavior options.
     /// </summary>
-    public SortableDefaultOptions Defaults { get; } = new();
+    public SortableDefaults Defaults { get; } = new();
 }
