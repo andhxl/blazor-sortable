@@ -23,16 +23,18 @@ export async function initSortable(id, options, component, assetOptions) {
 
     configureTransferCallbacks(options.group, component);
 
-    el.blazorSortable = globalThis.Sortable.create(el, buildSortableOptions(options, component));
+    el.blazorSortable = new Sortable(el, buildSortableOptions(options, component));
 }
 
 export function destroySortable(id) {
     const el = document.getElementById(id);
-    if (!el?.blazorSortable) {
+    const sortable = el?.blazorSortable;
+
+    if (!sortable) {
         return;
     }
 
-    el.blazorSortable.destroy();
+    sortable.destroy();
     delete el.blazorSortable;
 }
 
@@ -111,18 +113,18 @@ function buildSortableOptions(options, component) {
                 isClone);
         },
         onSelect: (evt) => {
-            keepSelectionInOneList(evt);
+            keepSelectionWithinCurrentSortable(evt);
 
             component.invokeMethodAsync(
                 "OnSelectJs",
-                getElementIndex(evt.from, evt.item),
-                getElementIndexes(evt.from, evt.items));
+                getElementIndex(evt.item),
+                getElementIndexes(evt.items));
         },
         onDeselect: (evt) => {
             component.invokeMethodAsync(
                 "OnDeselectJs",
-                getElementIndex(evt.from, evt.item),
-                getElementIndexes(evt.from, evt.items));
+                getElementIndex(evt.item),
+                getElementIndexes(evt.items));
         },
         onSpill: (evt) => {
             revertDomMove(evt, false);
@@ -135,67 +137,33 @@ function buildSortableOptions(options, component) {
 
             component.invokeMethodAsync(
                 "OnSpillJs",
-                getElementIndex(evt.from, evt.item),
-                getElementIndexes(evt.from, evt.items),
+                getElementIndex(evt.item),
+                getElementIndexes(evt.items),
                 isClone);
         }
     };
 }
 
-function keepSelectionInOneList(evt) {
-    const foreignItem = evt.items.find(item => item.parentElement !== evt.from);
-
-    if (!foreignItem) {
-        return;
-    }
-
-    for (const item of evt.items) {
-        if (item !== evt.item) {
-            globalThis.Sortable.utils.deselect(item);
-        }
-    }
-
-    evt.items = [evt.item];
-}
-
-function getIndexes(indices) {
-    return indices?.map(x => x.index) ?? [];
-}
-
 function revertDomMove(evt, isSwap) {
+    const pairs = getMovedElementPairs(evt);
+
+    for (const pair of pairs) {
+        pair.element.remove();
+    }
+
     if (isSwap) {
-        revertDomSwap(evt);
-        return;
-    }
-
-    const pairs = getMovedElementPairs(evt);
-
-    for (const pair of pairs) {
-        pair.element.remove();
+        evt.swapItem.remove();
     }
 
     for (const pair of pairs) {
         const referenceItem = evt.from.children[pair.oldIndex] ?? null;
         evt.from.insertBefore(pair.element, referenceItem);
     }
-}
 
-function revertDomSwap(evt) {
-    const pairs = getMovedElementPairs(evt);
-
-    for (const pair of pairs) {
-        pair.element.remove();
+    if (isSwap) {
+        const swapReferenceItem = evt.to.children[evt.newIndex] ?? null;
+        evt.to.insertBefore(evt.swapItem, swapReferenceItem);
     }
-
-    evt.swapItem.remove();
-
-    for (const pair of pairs) {
-        const referenceItem = evt.from.children[pair.oldIndex] ?? null;
-        evt.from.insertBefore(pair.element, referenceItem);
-    }
-
-    const swapReferenceItem = evt.to.children[evt.newIndex] ?? null;
-    evt.to.insertBefore(evt.swapItem, swapReferenceItem);
 }
 
 function getMovedElementPairs(evt) {
@@ -217,7 +185,7 @@ function isCloneMode(evt) {
 }
 
 function removeClone(evt) {
-    if (evt.clones?.length > 0) {
+    if (evt.clones?.length) {
         for (const clone of evt.clones) {
             clone.remove();
         }
@@ -228,12 +196,32 @@ function removeClone(evt) {
     evt.clone?.remove();
 }
 
-function getElementIndex(parent, element) {
-    return Array.prototype.indexOf.call(parent.children, element);
+function getIndexes(indices) {
+    return indices?.map(x => x.index) ?? [];
 }
 
-function getElementIndexes(parent, elements) {
-    return elements?.map(x => getElementIndex(parent, x)) ?? [];
+function keepSelectionWithinCurrentSortable(evt) {
+    const currentItems = evt.items.filter(item => item.parentElement === evt.from);
+
+    if (currentItems.length === evt.items.length) {
+        return;
+    }
+
+    for (const item of evt.items) {
+        if (item.parentElement !== evt.from) {
+            Sortable.utils.deselect(item);
+        }
+    }
+
+    evt.items = currentItems;
+}
+
+function getElementIndex(element) {
+    return Sortable.utils.index(element);
+}
+
+function getElementIndexes(elements) {
+    return elements?.map(getElementIndex) ?? [];
 }
 
 async function ensureSortableJs() {
@@ -251,14 +239,15 @@ function loadSortableJs(src) {
     return new Promise((resolve, reject) => {
         const sortableJs = document.createElement("script");
         sortableJs.src = src;
-        sortableJs.onload = () => resolve();
-        sortableJs.onerror = () => {
+
+        sortableJs.addEventListener("load", () => resolve(), { once: true });
+        sortableJs.addEventListener("error", () => {
             sortableJs.remove();
             sortableJsLoadPromise = null;
             reject(new Error(`Failed to load SortableJS from '${src}'.`));
-        };
+        }, { once: true });
 
-        document.body.appendChild(sortableJs);
+        document.body.append(sortableJs);
     });
 }
 
@@ -273,7 +262,7 @@ function ensureSortableJsAvailable() {
 }
 
 function isSortableJsAvailable() {
-    return typeof globalThis.Sortable === "function";
+    return typeof Sortable === "function";
 }
 
 function ensureStylesheet(version) {
@@ -281,9 +270,9 @@ function ensureStylesheet(version) {
         return;
     }
 
-    const stylesheetLinks = getHeadStylesheetLinks();
+    const headStylesheetLinks = getHeadStylesheetLinks();
 
-    if (stylesheetLinks.some(link => link.href.includes(stylesheetPath))) {
+    if (headStylesheetLinks.some(link => link.href.includes(stylesheetPath))) {
         stylesheetInjected = true;
         return;
     }
@@ -292,7 +281,7 @@ function ensureStylesheet(version) {
     link.rel = "stylesheet";
     link.href = `${stylesheetPath}?v=${version}`;
 
-    insertHeadStylesheetLink(stylesheetLinks, link);
+    insertHeadStylesheetLink(headStylesheetLinks, link);
     stylesheetInjected = true;
 }
 
@@ -300,12 +289,12 @@ function getHeadStylesheetLinks() {
     return Array.from(document.head.querySelectorAll('link[rel="stylesheet"]'));
 }
 
-function insertHeadStylesheetLink(stylesheetLinks, link) {
-    const firstStylesheetLink = stylesheetLinks[0];
+function insertHeadStylesheetLink(headStylesheetLinks, link) {
+    const firstHeadStylesheetLink = headStylesheetLinks[0];
 
-    if (firstStylesheetLink) {
-        firstStylesheetLink.before(link);
+    if (firstHeadStylesheetLink) {
+        firstHeadStylesheetLink.before(link);
     } else {
-        document.head.appendChild(link);
+        document.head.append(link);
     }
 }

@@ -196,7 +196,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public bool Disabled { get; set; }
 
     /// <summary>
-    /// Animation duration in milliseconds.
+    /// Animation duration in milliseconds. 0 - without animation.
     /// </summary>
     [Parameter]
     public int? Animation { get; set; }
@@ -269,6 +269,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// </summary>
     [Parameter]
     public double InvertedSwapThreshold { get; set; } = 1;
+
+    [Parameter]
+    public int? EmptyInsertThreshold { get; set; }
 
     /// <summary>
     /// If set to true, the fallback for non-HTML5 browsers will be used, even if an HTML5 browser is used.
@@ -535,6 +538,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             ["swapThreshold"] = SwapThreshold,
             ["invertSwap"] = InvertSwap,
             ["invertedSwapThreshold"] = InvertedSwapThreshold,
+            ["emptyInsertThreshold"] = EmptyInsertThreshold ?? defaults.EmptyInsertThreshold,
             ["forceFallback"] = ForceFallback ?? defaults.ForceFallback,
             ["fallbackClass"] = FallbackClass,
             ["fallbackOnBody"] = FallbackOnBody ?? defaults.FallbackOnBody,
@@ -689,7 +693,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 var info = CreateInfo(this);
 
                 await OnUpdate.InvokeAsync(new(
-                    item, items, info, oldIndex, oldIndexes, info, newIndex, newIndexes));
+                    item, items, info, oldIndex, oldIndexes, info, newIndex, newIndexes, false, isSwap));
             }
         }
         finally
@@ -770,7 +774,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 var items = oldIndexes.Select(i => convertedByOldIndex[i]).ToArray();
 
                 await OnAdd.InvokeAsync(new(
-                    item, items, fromInfo, oldIndex, oldIndexes, toInfo, newIndex, newIndexes, isClone));
+                    item, items, fromInfo, oldIndex, oldIndexes, toInfo, newIndex, newIndexes, isClone, isSwap));
             }
         }
         finally
@@ -794,7 +798,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             return;
         }
 
-        if (isClone && !hasPendingSwapItem)
+        var isSwap = hasPendingSwapItem;
+
+        if (isClone && !isSwap)
             return;
 
         // Capture the removed items before mutating the collection
@@ -803,7 +809,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
         var isMultiDragOperation = oldIndexes.Length > 0;
 
-        if (hasPendingSwapItem)
+        if (isSwap)
         {
             if (isClone)
             {
@@ -837,7 +843,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 var to = CreateInfo(SortableRegistry[toId]);
 
                 await OnRemove.InvokeAsync(new(
-                    item, items, from, oldIndex, oldIndexes, to, newIndex, newIndexes, isClone));
+                    item, items, from, oldIndex, oldIndexes, to, newIndex, newIndexes, isClone, isSwap));
             }
         }
         finally

@@ -22,5 +22,6 @@ public sealed record SortableEventArgs<TItem>(
     SortableInfo To,
     int NewIndex,
     IReadOnlyList<int> NewIndexes,
-    bool IsClone = false)
+    bool IsClone,
+    bool IsSwap)
     where TItem : notnull;

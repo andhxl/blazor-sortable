@@ -18,7 +18,7 @@ public sealed class SortableDefaultOptions
     /// <summary>
     /// Minimum pointer movement, in pixels, before fallback dragging starts.
     /// </summary>
-    public int FallbackTolerance { get; set; } = 3;
+    public int FallbackTolerance { get; set; } = 3; // So that we can multi-drag select items on mobile
 
     /// <summary>
     /// Animation duration in milliseconds.
@@ -39,6 +39,8 @@ public sealed class SortableDefaultOptions
     /// Minimum touch movement, in pixels, before delayed sorting is cancelled.
     /// </summary>
     public int TouchStartThreshold { get; set; } = 4;
+
+    public int EmptyInsertThreshold { get; set; } = 5;
 
     /// <summary>
     /// Enables automatic scrolling while dragging near scroll container edges.

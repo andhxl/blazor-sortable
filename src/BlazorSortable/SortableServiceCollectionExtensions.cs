@@ -10,43 +10,45 @@ namespace BlazorSortable;
 /// </summary>
 public static class SortableServiceCollectionExtensions
 {
-    /// <summary>
-    /// Adds BlazorSortable services to the specified <see cref="IServiceCollection" />.
-    /// </summary>
-    /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
-    /// <returns>The <see cref="IServiceCollection" /> so that additional calls can be chained.</returns>
-    public static IServiceCollection AddSortable(this IServiceCollection services) =>
-        AddSortable(services, static _ => { });
-
-    /// <summary>
-    /// Adds BlazorSortable services to the specified <see cref="IServiceCollection" />.
-    /// </summary>
-    /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
-    /// <param name="configureOptions">The <see cref="SortableOptions" /> configuration delegate.</param>
-    /// <returns>The <see cref="IServiceCollection" /> so that additional calls can be chained.</returns>
-    public static IServiceCollection AddSortable(
-        this IServiceCollection services,
-        Action<SortableOptions> configureOptions)
+    extension(IServiceCollection services)
     {
-        ArgumentNullException.ThrowIfNull(services);
-        ArgumentNullException.ThrowIfNull(configureOptions);
+        /// <summary>
+        /// Adds BlazorSortable services to the specified <see cref="IServiceCollection" />.
+        /// </summary>
+        /// <returns>The <see cref="IServiceCollection" /> so that additional calls can be chained.</returns>
+        public IServiceCollection AddSortable() =>
+            services.AddSortable(static _ => { });
 
-        services.TryAddScoped<SortableRegistry>();
-        services.Configure(configureOptions);
+        /// <summary>
+        /// Adds BlazorSortable services to the specified <see cref="IServiceCollection" />.
+        /// </summary>
+        /// <param name="configureOptions">The <see cref="SortableOptions" /> configuration delegate.</param>
+        /// <returns>The <see cref="IServiceCollection" /> so that additional calls can be chained.</returns>
+        public IServiceCollection AddSortable(Action<SortableOptions> configureOptions)
+        {
+            ArgumentNullException.ThrowIfNull(services);
+            ArgumentNullException.ThrowIfNull(configureOptions);
 
-        return services;
-    }
+            services.TryAddScoped<SortableRegistry>();
+            services.Configure(configureOptions);
 
-    public static IServiceCollection AddSortable(
-        this IServiceCollection services,
-        SortableOptions options)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        ArgumentNullException.ThrowIfNull(options);
+            return services;
+        }
 
-        services.TryAddScoped<SortableRegistry>();
-        services.TryAddSingleton(Options.Create(options));
+        /// <summary>
+        /// Adds BlazorSortable services to the specified <see cref="IServiceCollection" />.
+        /// </summary>
+        /// <param name="options">The <see cref="SortableOptions" /> instance to use.</param>
+        /// <returns>The <see cref="IServiceCollection" /> so that additional calls can be chained.</returns>
+        public IServiceCollection AddSortable(SortableOptions options)
+        {
+            ArgumentNullException.ThrowIfNull(services);
+            ArgumentNullException.ThrowIfNull(options);
 
-        return services;
+            services.TryAddScoped<SortableRegistry>();
+            services.TryAddSingleton(Options.Create(options));
+
+            return services;
+        }
     }
 }
