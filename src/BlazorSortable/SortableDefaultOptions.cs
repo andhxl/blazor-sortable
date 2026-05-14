@@ -50,7 +50,7 @@ public sealed class SortableDefaultOptions
     /// <summary>
     /// Reverts the dragged item when it is dropped outside a valid sortable target.
     /// </summary>
-    public bool RevertOnSpill { get; set; } = true; // FIXME: Default false?
+    public bool RevertOnSpill { get; set; }
 
     /// <summary>
     /// Key used to enable multi-drag selection.

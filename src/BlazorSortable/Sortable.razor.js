@@ -65,11 +65,17 @@ function buildSortableOptions(options, component) {
 
             revertDomMove(evt, isSwap);
 
+            let newIndex = evt.newIndex;
+
+            if (evt.to.children.length === 1 && newIndex === 1) {
+                newIndex = 0;
+            }
+
             component.invokeMethodAsync(
                 "OnUpdateJs",
                 evt.oldIndex,
                 getIndexes(evt.oldIndicies),
-                evt.newIndex,
+                newIndex,
                 getIndexes(evt.newIndicies),
                 isSwap);
         },

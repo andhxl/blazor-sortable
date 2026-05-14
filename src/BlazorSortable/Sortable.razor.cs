@@ -678,10 +678,6 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         }
         else
         {
-            // Sometimes SortableJS provides newIndex one greater than the last valid index.
-            if (Items.Count == 1 && newIndex == 1)
-                newIndex = 0;
-
             Items.RemoveAt(oldIndex);
             Items.Insert(newIndex, item);
         }
