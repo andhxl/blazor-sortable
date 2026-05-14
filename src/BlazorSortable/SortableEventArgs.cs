@@ -14,6 +14,7 @@ namespace BlazorSortable;
 /// <param name="NewIndexes">The new indexes of all items in the target sortable. Uses the same order as <paramref name="Items"/>.</param>
 /// <param name="IsClone">Indicates whether the operation uses cloned items.</param>
 public sealed record SortableEventArgs<TItem>(
+    SortableChangeOperation Operation,
     TItem Item,
     IReadOnlyList<TItem> Items,
     SortableInfo From,

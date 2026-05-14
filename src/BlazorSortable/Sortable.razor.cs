@@ -688,7 +688,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             {
                 var info = CreateInfo(this);
 
-                await OnUpdate.InvokeAsync(new(
+                await OnUpdate.InvokeAsync(new(SortableChangeOperation.Update,
                     item, items, info, oldIndex, oldIndexes, info, newIndex, newIndexes, false, isSwap));
             }
         }
@@ -769,7 +769,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 var item = convertedByOldIndex[oldIndex];
                 var items = oldIndexes.Select(i => convertedByOldIndex[i]).ToArray();
 
-                await OnAdd.InvokeAsync(new(
+                await OnAdd.InvokeAsync(new(SortableChangeOperation.Add,
                     item, items, fromInfo, oldIndex, oldIndexes, toInfo, newIndex, newIndexes, isClone, isSwap));
             }
         }
@@ -838,7 +838,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 var from = CreateInfo(this);
                 var to = CreateInfo(SortableRegistry[toId]);
 
-                await OnRemove.InvokeAsync(new(
+                await OnRemove.InvokeAsync(new(SortableChangeOperation.Remove,
                     item, items, from, oldIndex, oldIndexes, to, newIndex, newIndexes, isClone, isSwap));
             }
         }
