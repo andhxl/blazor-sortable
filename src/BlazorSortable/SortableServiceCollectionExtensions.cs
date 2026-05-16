@@ -46,7 +46,7 @@ public static class SortableServiceCollectionExtensions
             ArgumentNullException.ThrowIfNull(options);
 
             services.TryAddScoped<SortableRegistry>();
-            services.TryAddSingleton(Options.Create(options));
+            services.AddSingleton(Options.Create(options));
 
             return services;
         }

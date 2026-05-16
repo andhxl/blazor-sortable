@@ -263,7 +263,7 @@ function ensureSortableJsAvailable() {
     }
 
     throw new Error(
-        "SortableJS is not loaded. Add SortableJS before BlazorSortable initializes, or enable SortableOptions.LoadSortableJs."
+        "SortableJS is not loaded. Add SortableJS before BlazorSortable initializes, or enable SortableOptions.AutoLoadSortableJs."
     );
 }
 

@@ -3,7 +3,7 @@
 <RadzenStack Orientation="Orientation.Horizontal">
     <Sortable Items="classAItems"
               Class="items-column"
-              Pull="SortablePullMode.Clone"
+              PullMode="SortablePullMode.Clone"
               CloneFunction="i => new() { Value = i.Value }"
               GhostClass="clone-ghost"
               RevertOnSpill="true"
@@ -15,7 +15,7 @@
 
     <Sortable Items="classBItems"
               Class="items-column"
-              Put="SortablePutMode.Function"
+              PutMode="SortablePutMode.Function"
               PutFunction="c => c.Item is ClassA i && i.Value < 4"
               ConvertFunction="TryConvertToClassB"
               InvertSwap="true">
@@ -53,7 +53,7 @@
 <div class=""row"">
     <Sortable Items=""classAItems""
               Class=""items-column""
-              Pull=""SortablePullMode.Clone""
+              PullMode=""SortablePullMode.Clone""
               CloneFunction=""i => new() { Value = i.Value }""
               GhostClass=""clone-ghost""
               RevertOnSpill=""true""
@@ -65,7 +65,7 @@
 
     <Sortable Items=""classBItems""
               Class=""items-column""
-              Put=""SortablePutMode.Function""
+              PutMode=""SortablePutMode.Function""
               PutFunction=""c => c.Item is ClassA i && i.Value < 4""
               ConvertFunction=""TryConvertToClassB""
               InvertSwap=""true"">

@@ -65,7 +65,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Specifies additional custom attributes that will be rendered by the component.
     /// </summary>
     [Parameter(CaptureUnmatchedValues = true)]
-    public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+    public IReadOnlyDictionary<string, object?>? Attributes { get; set; }
 
     /// <summary>
     /// Unique identifier of the component. Must be globally unique across all Sortable instances.
@@ -88,13 +88,13 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Mode for pulling items from this Sortable component.
     /// </summary>
     [Parameter]
-    public SortablePullMode? Pull { get; set; }
+    public SortablePullMode? PullMode { get; set; }
 
     /// <summary>
     /// Array of target group names into which items from this Sortable component can be dragged.
     /// </summary>
     /// <remarks>
-    /// Used only when <see cref="Pull"/> is set to <see cref="SortablePullMode.Groups"/>.
+    /// Used only when <see cref="PullMode"/> is set to <see cref="SortablePullMode.Groups"/>.
     /// </remarks>
     [Parameter]
     public string[]? PullGroups { get; set; }
@@ -103,7 +103,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Factory method used to create a non-null clone of the dragged item.
     /// </summary>
     /// <remarks>
-    /// Used only when <see cref="Pull"/> is set to <see cref="SortablePullMode.Clone"/>.
+    /// Used only when <see cref="PullMode"/> is set to <see cref="SortablePullMode.Clone"/>.
     /// </remarks>
     [Parameter]
     public Func<TItem, TItem>? CloneFunction { get; set; }
@@ -112,7 +112,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Function used to determine whether an item can be pulled to the target Sortable component.
     /// </summary>
     /// <remarks>
-    /// Used only when <see cref="Pull"/> is set to <see cref="SortablePullMode.Function"/>.
+    /// Used only when <see cref="PullMode"/> is set to <see cref="SortablePullMode.Function"/>.
     /// This feature works only when the component runs on WebAssembly.
     /// SortableJS requires a synchronous JS-to-.NET call, which is not supported
     /// outside of WebAssembly, for example with server-side interactivity.
@@ -127,13 +127,13 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Mode for accepting items into this Sortable component.
     /// </summary>
     [Parameter]
-    public SortablePutMode? Put { get; set; }
+    public SortablePutMode? PutMode { get; set; }
 
     /// <summary>
     /// Array of source group names from which this Sortable component can accept items.
     /// </summary>
     /// <remarks>
-    /// Used only when <see cref="Put"/> is set to <see cref="SortablePutMode.Groups"/>.
+    /// Used only when <see cref="PutMode"/> is set to <see cref="SortablePutMode.Groups"/>.
     /// </remarks>
     [Parameter]
     public string[]? PutGroups { get; set; }
@@ -142,7 +142,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Function used to determine whether an item can be accepted by this Sortable component.
     /// </summary>
     /// <remarks>
-    /// Used only when <see cref="Put"/> is set to <see cref="SortablePutMode.Function"/>.
+    /// Used only when <see cref="PutMode"/> is set to <see cref="SortablePutMode.Function"/>.
     /// This feature works only when the component runs on WebAssembly.
     /// SortableJS requires a synchronous JS-to-.NET call, which is not supported
     /// outside of WebAssembly, for example with server-side interactivity.
@@ -154,11 +154,12 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public Predicate<SortableTransferContext<object>>? PutFunction { get; set; }
 
     /// <summary>
-    /// Gets or sets the function used to convert an item to a sortable value.
+    /// Function used to convert incoming items that are not assignable to <typeparamref name="TItem"/>.
     /// </summary>
-    /// <remarks>The conversion function is applied to each item to determine its sort order. If not set, the
-    /// default sorting behavior is used. This property is typically used to customize sorting for complex types or when
-    /// a specific value should be used for comparison.</remarks>
+    /// <remarks>
+    /// Used when an item is transferred from another Sortable component and cannot be cast to
+    /// <typeparamref name="TItem"/> directly. Return <see langword="false"/> when conversion is not possible.
+    /// </remarks>
     [Parameter]
     public SortableTryConvertFunc<TItem>? ConvertFunction { get; set; }
 
@@ -169,14 +170,20 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     public bool Sort { get; set; } = true;
 
     /// <summary>
-    /// Time in milliseconds to define when the sorting should start. Unfortunately, due to browser restrictions, delaying is not possible on IE or Edge with native drag and drop.
+    /// Time in milliseconds before sorting starts.
     /// </summary>
+    /// <remarks>
+    /// If not set, <see cref="SortableDefaults.Delay"/> is used.
+    /// </remarks>
     [Parameter]
     public int? Delay { get; set; }
 
     /// <summary>
-    /// Whether or not the delay should be applied only if the user is using touch (e.g., on a mobile device). No delay will be applied in any other case.
+    /// Whether the delay should be applied only for touch input.
     /// </summary>
+    /// <remarks>
+    /// If not set, <see cref="SortableDefaults.DelayOnTouchOnly"/> is used.
+    /// </remarks>
     [Parameter]
     public bool? DelayOnTouchOnly { get; set; }
 
@@ -185,6 +192,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// This option sets the minimum pointer movement that must occur before the delayed sorting is cancelled.
     /// Values between 3 to 5 are good.
     /// </summary>
+    /// <remarks>
+    /// If not set, <see cref="SortableDefaults.TouchStartThreshold"/> is used.
+    /// </remarks>
     [Parameter]
     public int? TouchStartThreshold { get; set; }
 
@@ -198,6 +208,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// <summary>
     /// Animation duration in milliseconds. 0 - without animation.
     /// </summary>
+    /// <remarks>
+    /// If not set, <see cref="SortableDefaults.Animation"/> is used.
+    /// </remarks>
     [Parameter]
     public int? Animation { get; set; }
 
@@ -223,13 +236,13 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// The draggable class will be applied to items that return true.
     /// </remarks>
     [Parameter]
-    public Predicate<TItem>? DraggableSelector { get; set; }
+    public Predicate<TItem>? DraggableItemSelector { get; set; }
 
     /// <summary>
     /// CSS class applied to items that can be dragged.
     /// </summary>
     /// <remarks>
-    /// Used in conjunction with <see cref="DraggableSelector"/> to style draggable items.
+    /// Used in conjunction with <see cref="DraggableItemSelector"/> to style draggable items.
     /// </remarks>
     [Parameter]
     public string DraggableClass { get; set; } = "sortable-draggable";
@@ -270,14 +283,13 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     [Parameter]
     public double InvertedSwapThreshold { get; set; } = 1;
 
-    [Parameter]
-    public int? EmptyInsertThreshold { get; set; }
-
     /// <summary>
-    /// If set to true, the fallback for non-HTML5 browsers will be used, even if an HTML5 browser is used.
-    /// This makes it possible to test behavior for older browsers in newer browsers, or make drag and drop feel more consistent between desktop, mobile, and old browsers.
-    /// The fallback always generates a copy of the DOM element and appends the class defined by <see cref="FallbackClass"/>. This behavior controls the look of the dragged element.
+    /// Forces SortableJS to use fallback drag behavior instead of native HTML5 drag and drop.
     /// </summary>
+    /// <remarks>
+    /// If not set, <see cref="SortableDefaults.ForceFallback"/> is used.
+    /// The fallback generates a copy of the DOM element and applies <see cref="FallbackClass"/>.
+    /// </remarks>
     [Parameter]
     public bool? ForceFallback { get; set; }
 
@@ -290,17 +302,30 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// <summary>
     /// Appends the cloned DOM element to the document body.
     /// </summary>
+    /// <remarks>
+    /// If not set, <see cref="SortableDefaults.FallbackOnBody"/> is used.
+    /// </remarks>
     [Parameter]
     public bool? FallbackOnBody { get; set; }
 
     /// <summary>
-    /// Emulates the native drag threshold. Specify in pixels how far the mouse should move before it's considered as a drag. Useful if the items are also clickable like in a list of links.
-    /// When the user clicks inside a sortable element, it's not uncommon for your hand to move a little between the time you press and the time you release.
-    /// Dragging only starts if you move the pointer past a certain tolerance, so that you don't accidentally start dragging every time you click.
-    /// 3 to 5 are probably good values.
+    /// Minimum pointer movement, in pixels, before fallback dragging starts.
     /// </summary>
+    /// <remarks>
+    /// If not set, <see cref="SortableDefaults.FallbackTolerance"/> is used.
+    /// Values between 3 and 5 are usually good for clickable items.
+    /// </remarks>
     [Parameter]
     public int? FallbackTolerance { get; set; }
+
+    /// <summary>
+    /// Distance, in pixels, from an empty sortable container at which an item can be inserted.
+    /// </summary>
+    /// <remarks>
+    /// If not set, <see cref="SortableDefaults.EmptyInsertThreshold"/> is used.
+    /// </remarks>
+    [Parameter]
+    public int? EmptyInsertThreshold { get; set; }
 
     /// <summary>
     /// Enables multi-drag functionality.
@@ -318,7 +343,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Key used to enable multi-drag selection.
     /// </summary>
     /// <remarks>
-    /// Default is "Control" key. Users must hold this key while clicking to select multiple items.
+    /// If not set, <see cref="SortableDefaults.MultiDragKey"/> is used.
+    /// Users must hold this key while clicking to select multiple items.
+    /// Set to an empty string to allow multi-drag selection without holding a modifier key.
     /// </remarks>
     [Parameter]
     public string? MultiDragKey { get; set; }
@@ -356,11 +383,17 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Enables scrolling of the container during dragging.
     /// </summary>
     /// <remarks>
-    /// When enabled, the container will scroll when dragging items near its edges.
+    /// If not set, <see cref="SortableDefaults.Scroll"/> is used.
     /// </remarks>
     [Parameter]
     public bool? Scroll { get; set; }
 
+    /// <summary>
+    /// Reverts the dragged item when it is dropped outside a valid sortable target.
+    /// </summary>
+    /// <remarks>
+    /// If not set, <see cref="SortableDefaults.RevertOnSpill"/> is used.
+    /// </remarks>
     [Parameter]
     public bool? RevertOnSpill { get; set; }
 
@@ -382,6 +415,9 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     [Parameter]
     public EventCallback<SortableEventArgs<TItem>> OnRemove { get; set; }
 
+    /// <summary>
+    /// Callback invoked after an update, add, or remove operation.
+    /// </summary>
     [Parameter]
     public EventCallback<SortableEventArgs<TItem>> OnChange { get; set; }
 
@@ -397,11 +433,14 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     [Parameter]
     public EventCallback<SortableSelectionEventArgs<TItem>> OnDeselect { get; set; }
 
+    /// <summary>
+    /// Event that occurs when an item is dropped outside a valid sortable target.
+    /// </summary>
     [Parameter]
     public EventCallback<SortableSpillEventArgs<TItem>> OnSpill { get; set; }
 
     [Inject] private IJSRuntime JsRuntime { get; set; } = default!;
-    [Inject] private SortableRegistry SortableRegistry { get; set; } = default!;
+    [Inject] private SortableRegistry Registry { get; set; } = default!;
     [Inject] private IOptions<SortableOptions> Options { get; set; } = default!;
 
     private IJSObjectReference? jsModule;
@@ -415,15 +454,16 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     private TItem pendingSwapItem = default!;
     private bool hasPendingSwapItem;
 
-    private object GetItemKey(TItem item) => ItemKeySelector?.Invoke(item) ?? item;
+    private object GetItemKey(TItem item) =>
+        ItemKeySelector?.Invoke(item) ?? item;
 
     private string? GetItemClass(TItem item) =>
-        DraggableSelector?.Invoke(item) == true ? DraggableClass : null;
+        DraggableItemSelector?.Invoke(item) == true ? DraggableClass : null;
 
     /// <inheritdoc/>
     protected override void OnParametersSet()
     {
-        switch (Pull)
+        switch (PullMode)
         {
             case SortablePullMode.Groups:
                 ArgumentNullException.ThrowIfNull(PullGroups);
@@ -436,7 +476,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 break;
         }
 
-        switch (Put)
+        switch (PutMode)
         {
             case SortablePutMode.Groups:
                 ArgumentNullException.ThrowIfNull(PutGroups);
@@ -461,7 +501,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
 
         // Check WebAssembly-only options here because OnParametersSet can run during
         // server prerendering, where InteractiveWebAssembly components are not in the browser yet.
-        if ((Pull == SortablePullMode.Function || Put == SortablePutMode.Function) &&
+        if ((PullMode == SortablePullMode.Function || PutMode == SortablePutMode.Function) &&
             !OperatingSystem.IsBrowser())
         {
             throw new PlatformNotSupportedException(
@@ -484,7 +524,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
                 version = AssemblyVersion.Value
             });
 
-        SortableRegistry.Register(Id, this);
+        Registry.Register(Id, this);
     }
 
     /// <inheritdoc/>
@@ -506,7 +546,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         // Dispose selfReference after jsModule
         selfReference?.Dispose();
 
-        SortableRegistry.Unregister(Id);
+        Registry.Unregister(Id);
     }
 
     private Dictionary<string, object> BuildSortableOptions()
@@ -541,11 +581,11 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             ["swapThreshold"] = SwapThreshold,
             ["invertSwap"] = InvertSwap,
             ["invertedSwapThreshold"] = InvertedSwapThreshold,
-            ["emptyInsertThreshold"] = EmptyInsertThreshold ?? defaults.EmptyInsertThreshold,
             ["forceFallback"] = ForceFallback ?? defaults.ForceFallback,
             ["fallbackClass"] = FallbackClass,
             ["fallbackOnBody"] = FallbackOnBody ?? defaults.FallbackOnBody,
             ["fallbackTolerance"] = FallbackTolerance ?? defaults.FallbackTolerance,
+            ["emptyInsertThreshold"] = EmptyInsertThreshold ?? defaults.EmptyInsertThreshold,
         };
 
         if (!string.IsNullOrWhiteSpace(Handle))
@@ -554,7 +594,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         if (!string.IsNullOrWhiteSpace(Filter))
             options["filter"] = Filter;
 
-        if (DraggableSelector is not null)
+        if (DraggableItemSelector is not null)
             options["draggable"] = "." + DraggableClass;
 
         if (MultiDrag)
@@ -574,7 +614,6 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         options["scroll"] = Scroll ?? defaults.Scroll;
 
         options["revertOnSpill"] = RevertOnSpill ?? defaults.RevertOnSpill;
-
         // removeOnSpill mutates the DOM without raising onRemove and can still be followed
         // by MultiDrag update events, so the wrapper only exposes revertOnSpill.
         options["removeOnSpill"] = false;
@@ -583,7 +622,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     }
 
     private object? GetPull() =>
-        Pull switch
+        PullMode switch
         {
             SortablePullMode.True => true,
             SortablePullMode.False => false,
@@ -594,7 +633,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         };
 
     private object? GetPut() =>
-        Put switch
+        PutMode switch
         {
             SortablePutMode.True => true,
             SortablePutMode.False => false,
@@ -622,7 +661,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
     public bool OnPullJs(string toId)
     {
-        var to = SortableRegistry[toId];
+        var to = Registry[toId];
 
         var item = Items![draggedItemIndex];
         var items = draggedItemIndexes.Select(i => Items[i]).ToArray();
@@ -634,7 +673,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     [JSInvokable, EditorBrowsable(EditorBrowsableState.Never)]
     public bool OnPutJs(string fromId)
     {
-        var from = SortableRegistry[fromId];
+        var from = Registry[fromId];
 
         var item = from.GetTransferItem(from.DraggedItemIndex);
         var items = from.DraggedItemIndexes.Select(from.GetTransferItem).ToArray();
@@ -720,7 +759,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
         bool isClone,
         bool isSwap)
     {
-        var from = SortableRegistry[fromId];
+        var from = Registry[fromId];
         from.ShouldSkipNextRemove = true;
 
         var isMultiDragOperation = oldIndexes.Length > 0;
@@ -851,7 +890,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
             if (OnRemove.HasDelegate || OnChange.HasDelegate)
             {
                 var fromInfo = CreateInfo(this);
-                var toInfo = CreateInfo(SortableRegistry[toId]);
+                var toInfo = CreateInfo(Registry[toId]);
 
                 var args = new SortableEventArgs<TItem>(
                     SortableChangeOperation.Remove,
@@ -936,7 +975,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     {
         var item = Items![index];
 
-        return Pull == SortablePullMode.Clone
+        return PullMode == SortablePullMode.Clone
             ? CloneFunction!(item)
             : item;
     }
