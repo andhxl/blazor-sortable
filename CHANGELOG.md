@@ -4,21 +4,51 @@
 
 ### Breaking Changes
 
+- Renamed `Sortable` parameters:
+  - `Pull` -> `PullMode`
+  - `Put` -> `PutMode`
+  - `KeySelector` -> `ItemKeySelector`
+  - `DraggableSelector` -> `DraggableItemSelector`
+- Changed `ConvertFunction` from `Func<SortableTransferContext<object>, TItem?>?` to `SortableTryConvertFunc<TItem>?`.
+  The new delegate follows the `Try*` pattern and returns `false` when conversion fails.
 - Changed `OnUpdate`, `OnAdd`, and `OnRemove` from `Action<SortableEventArgs<TItem>>?` to `EventCallback<SortableEventArgs<TItem>>`.
 - Changed `SortableEventArgs<TItem>.From` and `SortableEventArgs<TItem>.To` from `ISortableInfo` to `SortableInfo`.
 - Changed `SortableTransferContext<TItem>.From` and `SortableTransferContext<TItem>.To` from `ISortableInfo` to `SortableInfo`.
+- Extended `SortableEventArgs<TItem>` with operation metadata, multi-drag item/index collections, and swap information.
+  Code that directly calls the positional record constructor must be updated.
+- Extended `SortableTransferContext<TItem>` with the `Items` collection.
+  Code that directly calls the positional record constructor must be updated.
+- Changed per-component behavior overrides to nullable values that fall back to `SortableOptions.Defaults`:
+  `Delay`, `DelayOnTouchOnly`, `TouchStartThreshold`, `Animation`, `ForceFallback`,
+  `FallbackOnBody`, `FallbackTolerance`, and `Scroll`.
+- Changed effective defaults when component parameters are not set:
+  `Delay` from `0` to `150`, `DelayOnTouchOnly` from `false` to `true`,
+  `TouchStartThreshold` from `0` to `4`, and `FallbackTolerance` from `0` to `3`.
+- Removed the public `ISortableInfo` contract from event/context payloads.
+  Use `SortableInfo` instead.
 
 ### Added
 
 - Added automatic loading for the bundled SortableJS script.
 - Added automatic loading for the bundled BlazorSortable stylesheet.
-- Added `SortableOptions` for configuring BlazorSortable asset loading.
+- Added `SortableOptions` and `SortableDefaults` for configuring asset loading and default Sortable behavior.
 - Added the bundled SortableJS 1.15.7 script to the package.
+- Added `UseItemKeys` for disabling Blazor item keys when duplicate item keys can appear in the same list.
+- Added multi-drag support:
+  `MultiDrag`, `SelectedClass`, `MultiDragKey`, `AvoidImplicitDeselect`, `OnSelect`,
+  `OnDeselect`, and `SortableSelectionEventArgs<TItem>`.
+- Added swap support:
+  `Swap`, `SwapClass`, `IsSwap`, and swap-aware add/remove/update handling.
+- Added spill support:
+  `RevertOnSpill`, `EmptyInsertThreshold`, `OnSpill`, and `SortableSpillEventArgs<TItem>`.
+- Added `OnChange`, raised after update, add, and remove operations.
+- Added `SortableChangeOperation` to identify the kind of list change in event args.
+- Added `Items`, `OldIndexes`, and `NewIndexes` metadata for multi-drag operations.
+- Added default helper styles for multi-drag selection and swap highlighting.
 
 ### Changed
 
-- Renamed the package JavaScript module from `blazor-sortable.js` to `Sortable.razor.js`.
-- Updated package metadata and included license and third-party notices in the package.
+- Lowered the library target framework from `net8.0` to `net6.0`.
 
 ### Fixes
 
@@ -27,46 +57,93 @@
 
 ### Migration
 
+#### Renamed parameters
+
+Update renamed `Sortable` parameters:
+
+```razor
+<!-- Before -->
+<Sortable Items="items"
+          Pull="SortablePullMode.Clone"
+          Put="SortablePutMode.True"
+          KeySelector="x => x.Id"
+          DraggableSelector="x => x.CanDrag" />
+
+<!-- After -->
+<Sortable Items="items"
+          PullMode="SortablePullMode.Clone"
+          PutMode="SortablePutMode.True"
+          ItemKeySelector="x => x.Id"
+          DraggableItemSelector="x => x.CanDrag" />
+```
+
 #### Event callbacks
 
-Update handlers from `Action<SortableEventArgs<TItem>>` assignments to normal Blazor event callback usage.
+`OnUpdate`, `OnAdd`, and `OnRemove` are now Blazor `EventCallback<SortableEventArgs<TItem>>` parameters
+instead of `Action<SortableEventArgs<TItem>>?`.
 
-Before:
+If a handler previously called `StateHasChanged()` only to refresh the component after the callback,
+that call can usually be removed because `EventCallback` participates in Blazor's normal render pipeline.
 
-```razor
-<Sortable Items="@items"
-          OnUpdate="@OnUpdate" />
-```
-
-```csharp
-private void OnUpdate(SortableEventArgs<Item> args)
-{
-    // ...
-}
-```
-
-After:
+In some cases Razor may no longer infer `TItem` from the callback alone. If type inference fails,
+specify the item type explicitly:
 
 ```razor
-<Sortable Items="@items"
+<Sortable TItem="Item"
+          Items="items"
           OnUpdate="OnUpdate" />
 ```
-
-```csharp
-private Task OnUpdate(SortableEventArgs<Item> args)
-{
-    // ...
-    return Task.CompletedTask;
-}
-```
-
-`void` handlers are still supported by Blazor, but `Task` is recommended for asynchronous work.
 
 #### SortableInfo
 
 `From` and `To` now expose `SortableInfo`, which is a snapshot of sortable identity information and does not expose the component instance.
 
 If your code only used `Id` or `Group`, no behavioral change is required.
+
+#### ConvertFunction
+
+Update conversion logic to the new `Try*` delegate shape.
+
+Before:
+
+```csharp
+private Item? Convert(SortableTransferContext<object> context)
+{
+    return context.Item is OtherItem other
+        ? new Item(other.Value)
+        : null;
+}
+```
+
+After:
+
+```csharp
+private bool TryConvert(SortableTransferContext<object> context, out Item item)
+{
+    if (context.Item is OtherItem other)
+    {
+        item = new Item(other.Value);
+        return true;
+    }
+
+    item = default!;
+    return false;
+}
+```
+
+#### Component defaults
+
+Component parameters such as `Delay`, `Animation`, `ForceFallback`, `FallbackTolerance`, and `Scroll`
+now use `SortableOptions.Defaults` when they are not set on the component.
+
+The following effective defaults changed from the previous version:
+
+| Option | Previous default | 8.0.0 default |
+|--------|------------------|---------------|
+| `Delay` | `0` | `150` |
+| `DelayOnTouchOnly` | `false` | `true` |
+| `TouchStartThreshold` | `0` | `4` |
+| `FallbackTolerance` | `0` | `3` |
 
 #### Asset loading
 
