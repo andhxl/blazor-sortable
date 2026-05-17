@@ -1,5 +1,11 @@
 # Changelog
 
+## 8.0.4
+
+### Fixes
+
+- Fixed multi-drag selection reset after moving selected items between sortable components.
+
 ## 8.0.1
 
 ### Changed

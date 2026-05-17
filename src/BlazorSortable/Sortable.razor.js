@@ -25,7 +25,7 @@ export async function initSortable(id, options, component, assetOptions) {
 
     const sortable = new Sortable(el, buildSortableOptions(options, component));
     el.blazorSortable = sortable;
-    el.blazorSortableCleanup = configureAdaptiveMultiDragKey(el, sortable, options);
+    el.blazorSortableCleanup = configureTouchAwareMultiDragKey(el, sortable, options);
 }
 
 export function destroySortable(id) {
@@ -53,7 +53,7 @@ function configureTransferCallbacks(group, component) {
     }
 }
 
-function configureAdaptiveMultiDragKey(el, sortable, options) {
+function configureTouchAwareMultiDragKey(el, sortable, options) {
     if (!options.multiDragKey) {
         return null;
     }
@@ -86,8 +86,10 @@ function buildSortableOptions(options, component) {
                 evt.oldIndex,
                 getIndexes(evt.oldIndicies));
         },
-        onEnd: () => {
+        onEnd: (evt) => {
             component.invokeMethodAsync("OnEndJs");
+
+            resetCrossSortableMultiDragSelection(evt);
         },
         onUpdate: (evt) => {
             const isSwap = Boolean(evt.swapItem);
@@ -202,7 +204,7 @@ function revertDomMove(evt, isSwap) {
 }
 
 function getMovedElementPairs(evt) {
-    if (evt.oldIndicies?.length > 0) {
+    if (evt.oldIndicies?.length) {
         return evt.oldIndicies.map(x => ({
             element: x.multiDragElement,
             oldIndex: x.index
@@ -249,6 +251,16 @@ function keepSelectionWithinCurrentSortable(evt) {
     }
 
     evt.items = currentItems;
+}
+
+function resetCrossSortableMultiDragSelection(evt) {
+    if (evt.from === evt.to || !evt.items?.length) {
+        return;
+    }
+
+    setTimeout(() => {
+        Sortable.get(evt.to)?.multiDrag?._deselectMultiDrag?.();
+    });
 }
 
 function getElementIndex(element) {
