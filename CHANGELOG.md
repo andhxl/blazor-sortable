@@ -1,11 +1,5 @@
 # Changelog
 
-## 8.0.2
-
-### Fixes
-
-- Reverted touch-specific multi-drag key behavior added in `8.0.1` because it caused multi-drag selection regressions after moving items between lists.
-
 ## 8.0.1
 
 ### Changed
