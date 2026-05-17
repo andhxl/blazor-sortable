@@ -94,7 +94,7 @@ builder.Services.AddSortable(new SortableOptions
 | `FallbackOnBody` | `bool` | `false` | Appends the fallback clone element to the document body |
 | `FallbackTolerance` | `int` | `3` | Minimum pointer movement, in pixels, before fallback dragging starts |
 | `EmptyInsertThreshold` | `int` | `5` | Distance, in pixels, from an empty sortable container at which an item can be inserted |
-| `MultiDragKey` | `string` | `"Control"` | Key used to select multiple items in multi-drag mode for mouse input. Touch input does not require a modifier key. Set to an empty string to select without holding a modifier key for all input types |
+| `MultiDragKey` | `string` | `"Control"` | Key used to select multiple items in multi-drag mode. Set to an empty string to select without holding a modifier key |
 | `Scroll` | `bool` | `true` | Enables automatic scrolling while dragging near scroll container edges |
 | `RevertOnSpill` | `bool` | `false` | Reverts the dragged item when it is dropped outside a valid sortable target |
 
@@ -256,7 +256,7 @@ You can disable it with `AutoLoadStylesheet = false` if you want to provide thes
 | `EmptyInsertThreshold` | `int?` | `Defaults.EmptyInsertThreshold` (`5`) | Distance, in pixels, from an empty sortable container at which an item can be inserted |
 | `MultiDrag` | `bool` | `false` | Enables multi-drag selection and moving multiple items together |
 | `SelectedClass` | `string` | `"sortable-selected"` | CSS class for selected items in multi-drag mode |
-| `MultiDragKey` | `string?` | `Defaults.MultiDragKey` (`"Control"`) | Key used to select multiple items in multi-drag mode for mouse input. Touch input does not require a modifier key. Set to an empty string to select without holding a modifier key for all input types |
+| `MultiDragKey` | `string?` | `Defaults.MultiDragKey` (`"Control"`) | Key used to select multiple items in multi-drag mode. Set to an empty string to select without holding a modifier key |
 | `AvoidImplicitDeselect` | `bool` | `false` | Prevents automatic deselection when clicking selected items in multi-drag mode |
 | `Swap` | `bool` | `false` | Enables swap mode. Cannot be used together with `MultiDrag` |
 | `SwapClass` | `string` | `"sortable-swap-highlight"` | CSS class applied to items during swap highlighting |

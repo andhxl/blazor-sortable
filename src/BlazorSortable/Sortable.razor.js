@@ -23,9 +23,7 @@ export async function initSortable(id, options, component, assetOptions) {
 
     configureTransferCallbacks(options.group, component);
 
-    const sortable = new Sortable(el, buildSortableOptions(options, component));
-    el.blazorSortable = sortable;
-    el.blazorSortableCleanup = configureAdaptiveMultiDragKey(el, sortable, options);
+    el.blazorSortable = new Sortable(el, buildSortableOptions(options, component));
 }
 
 export function destroySortable(id) {
@@ -35,9 +33,6 @@ export function destroySortable(id) {
     if (!sortable) {
         return;
     }
-
-    el.blazorSortableCleanup?.();
-    delete el.blazorSortableCleanup;
 
     sortable.destroy();
     delete el.blazorSortable;
@@ -51,30 +46,6 @@ function configureTransferCallbacks(group, component) {
     if (group.put === "function") {
         group.put = (_to, from) => component.invokeMethod("OnPutJs", from.el.id);
     }
-}
-
-function configureAdaptiveMultiDragKey(el, sortable, options) {
-    if (!options.multiDragKey) {
-        return null;
-    }
-
-    const updateMultiDragKey = evt => {
-        const isTouchInput = evt.pointerType === "touch" || evt.type === "touchstart";
-        sortable.option("multiDragKey", isTouchInput ? "" : options.multiDragKey);
-    };
-
-    if (sortable.options.supportPointer) {
-        el.addEventListener("pointerdown", updateMultiDragKey, true);
-        return () => el.removeEventListener("pointerdown", updateMultiDragKey, true);
-    }
-
-    el.addEventListener("mousedown", updateMultiDragKey, true);
-    el.addEventListener("touchstart", updateMultiDragKey, true);
-
-    return () => {
-        el.removeEventListener("mousedown", updateMultiDragKey, true);
-        el.removeEventListener("touchstart", updateMultiDragKey, true);
-    };
 }
 
 function buildSortableOptions(options, component) {
