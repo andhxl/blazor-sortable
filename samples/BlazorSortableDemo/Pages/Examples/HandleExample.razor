@@ -1,0 +1,36 @@
+@implements IExample
+
+<Sortable Items="classAItems"
+          Class="items-column"
+          Handle=".handle"
+          ForceFallback="false">
+    <RadzenCard class="item">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+            <div class="handle" />
+            @context
+        </RadzenStack>
+    </RadzenCard>
+</Sortable>
+
+@code {
+    private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
+
+    public static string Id => "handle";
+    public static string Title => "Handle";
+
+    public static string Code => @"
+<Sortable Items=""classAItems""
+          Class=""items-column""
+          Handle="".handle""
+          ForceFallback=""false"">
+    <div class=""item item-with-handle"">
+        <span class=""handle""></span>
+        @context
+    </div>
+</Sortable>
+
+@code {
+    private readonly IList<ClassA> classAItems = Utils.CreateItemList<ClassA>(5);
+}
+";
+}

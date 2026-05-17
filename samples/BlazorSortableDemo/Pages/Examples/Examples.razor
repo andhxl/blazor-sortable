@@ -1,0 +1,32 @@
+@attribute [Route(ExampleCatalog.RouteTemplate)]
+
+@if (example is not null)
+{
+    <ExampleSection @key="(example.Id, resetToken)"
+                    Title="@example.Title"
+                    Code="@example.Code"
+                    Reset="ResetExample">
+        <ErrorBoundary>
+            <DynamicComponent Type="example.Type" />
+        </ErrorBoundary>
+    </ExampleSection>
+}
+else
+{
+    <NotFound />
+}
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+
+    private ExampleDefinition? example;
+
+    protected override void OnParametersSet()
+    {
+        example = ExampleCatalog.Find(Id);
+    }
+
+    private int resetToken;
+    private void ResetExample() => resetToken++;
+}

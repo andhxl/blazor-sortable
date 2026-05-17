@@ -1,14 +1,16 @@
 namespace BlazorSortable;
 
 /// <summary>
-/// Represents the context of transferring an item between sortable components.
+/// Represents the context for transferring items between sortable components.
 /// </summary>
-/// <typeparam name="TItem">The type of the item being transferred.</typeparam>
-/// <param name="Item">The item being transferred between sortable components.</param>
-/// <param name="From">The source sortable component.</param>
-/// <param name="To">The target sortable component.</param>
+/// <typeparam name="TItem">The type of the items.</typeparam>
+/// <param name="Item">The primary item being transferred.</param>
+/// <param name="Items">Items associated with the transfer when a collection is available.</param>
+/// <param name="From">Source sortable information.</param>
+/// <param name="To">Target sortable information.</param>
 public sealed record SortableTransferContext<TItem>(
     TItem Item,
-    ISortableInfo From,
-    ISortableInfo To)
+    IReadOnlyList<TItem> Items,
+    SortableInfo From,
+    SortableInfo To)
     where TItem : notnull;

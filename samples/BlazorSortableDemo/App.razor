@@ -1,0 +1,12 @@
+<HeadContent>
+    <link rel="stylesheet" href="css/examples.css?v=@typeof(App).Assembly.GetName().Version!.ToString(3)" />
+</HeadContent>
+
+<RadzenComponents />
+
+<Router AppAssembly="typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>

@@ -2,9 +2,13 @@ namespace BlazorSortable.Internal;
 
 internal interface ISortableList : ISortableInfo
 {
-    object this[int index] { get; }
+    object GetTransferItem(int index);
+
+    bool TrySetPendingSwapItem(object item, SortableInfo from, SortableInfo to);
 
     int DraggedItemIndex { get; }
 
-    bool SuppressNextRemove { get; set; }
+    IReadOnlyList<int> DraggedItemIndexes { get; }
+
+    bool ShouldSkipNextRemove { get; set; }
 }

@@ -1,0 +1,56 @@
+@implements IExample
+
+<RadzenStack Orientation="Orientation.Horizontal">
+    <Sortable Items="classAItems1"
+              Class="items-column"
+              Swap="true"
+              Group="swap">
+        <RadzenCard class="item">
+            @context
+        </RadzenCard>
+    </Sortable>
+
+    <Sortable Items="classAItems2"
+              Class="items-column"
+              Swap="true"
+              Group="swap">
+        <RadzenCard class="item">
+            @context
+        </RadzenCard>
+    </Sortable>
+</RadzenStack>
+
+@code {
+    private readonly IList<ClassA> classAItems1 = Utils.CreateItemList<ClassA>(5);
+    private readonly IList<ClassA> classAItems2 = Utils.CreateItemList<ClassA>(5, offset: 5);
+
+    public static string Id => "swap";
+    public static string Title => "Swap";
+
+    public static string Code => @"
+<div class=""row"">
+    <Sortable Items=""classAItems1""
+              Class=""items-column""
+              Swap=""true""
+              Group=""swap"">
+        <div class=""item"">
+            @context
+        </div>
+    </Sortable>
+
+    <Sortable Items=""classAItems2""
+              Class=""items-column""
+              Swap=""true""
+              Group=""swap"">
+        <div class=""item"">
+            @context
+        </div>
+    </Sortable>
+</div>
+
+@code {
+    private readonly IList<ClassA> classAItems1 = Utils.CreateItemList<ClassA>(5);
+    private readonly IList<ClassA> classAItems2 = Utils.CreateItemList<ClassA>(5, offset: 5);
+}
+";
+}
