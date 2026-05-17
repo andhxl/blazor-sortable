@@ -7,6 +7,10 @@
 - Renamed the unmatched attributes parameter from `Attributes` to `AdditionalAttributes`.
   This affects only consumers who set the capture-unmatched-values parameter explicitly by name.
 
+### Fixes
+
+- Fixed multi-drag selection on touch devices by ignoring `MultiDragKey` for touch input.
+
 ## 8.0.0
 
 ### Breaking Changes
