@@ -65,7 +65,7 @@ public sealed partial class Sortable<TItem> : ISortableList, IAsyncDisposable
     /// Specifies additional custom attributes that will be rendered by the component.
     /// </summary>
     [Parameter(CaptureUnmatchedValues = true)]
-    public IReadOnlyDictionary<string, object?>? Attributes { get; set; }
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
     /// <summary>
     /// Unique identifier of the component. Must be globally unique across all Sortable instances.

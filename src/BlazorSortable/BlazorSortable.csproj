@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <Version>8.0.0</Version>
+    <Version>8.0.1</Version>
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>14.0</LangVersion>
     <Nullable>enable</Nullable>
@@ -23,7 +23,6 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>blazor;sortablejs;sortable;reorder;drag;drag-and-drop</PackageTags>
-    <PackageReleaseNotes>Major release with breaking changes. See CHANGELOG.md.</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/andhxl/blazor-sortable</RepositoryUrl>
   </PropertyGroup>
 

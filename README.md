@@ -54,6 +54,14 @@ By default, BlazorSortable loads the bundled SortableJS 1.15.7 script and the ba
 
 `AddSortable` accepts an optional configuration delegate:
 
+```csharp
+builder.Services.AddSortable(options =>
+{
+    options.AutoLoadStylesheet = false;
+    options.Defaults.ForceFallback = false;
+});
+```
+
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `AutoLoadSortableJs` | `bool` | `true` | Loads the bundled SortableJS script automatically |
@@ -65,12 +73,11 @@ You can also pass a preconfigured `SortableOptions` instance:
 ```csharp
 builder.Services.AddSortable(new SortableOptions
 {
-    AutoLoadSortableJs = false,
     AutoLoadStylesheet = false,
     Defaults =
     {
         ForceFallback = false,
-        FallbackOnBody = true
+        RevertOnSpill = true
     }
 });
 ```
@@ -215,7 +222,7 @@ You can disable it with `AutoLoadStylesheet = false` if you want to provide thes
 | `ItemKeySelector` | `Func<TItem, object>?` | `null` | Function for generating a stable item key. If not set, the item itself is used |
 | `Class` | `string?` | `null` | CSS class for the container |
 | `Style` | `string?` | `null` | Inline CSS styles for the container |
-| `Attributes` | `IReadOnlyDictionary<string, object?>?` | `null` | Additional custom attributes that will be rendered by the component |
+| `AdditionalAttributes` | `IReadOnlyDictionary<string, object>?` | `null` | Additional custom attributes that will be rendered by the component |
 | `Id` | `string` | `Random GUID` | Unique identifier of the component. Used internally for coordination between Sortable components. Must be globally unique |
 | `Group` | `string` | `Random GUID` | Name of the group for interacting with other Sortable components |
 | `PullMode` | `SortablePullMode?` | `null` | Mode for pulling items from this Sortable component |
@@ -285,8 +292,11 @@ You can disable it with `AutoLoadStylesheet = false` if you want to provide thes
 ## Events
 
 `OnUpdate`, `OnAdd`, `OnRemove`, and `OnChange` receive a `SortableEventArgs<TItem>` parameter.
+
 `OnSelect` and `OnDeselect` receive a `SortableSelectionEventArgs<TItem>` parameter.
+
 `OnSpill` receives a `SortableSpillEventArgs<TItem>` parameter.
+
 Functions like `PullFunction`, `PutFunction`, and `ConvertFunction` use a `SortableTransferContext<T>` parameter.
 
 ### SortableEventArgs

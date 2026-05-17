@@ -1,5 +1,12 @@
 # Changelog
 
+## 8.0.1
+
+### Changed
+
+- Renamed the unmatched attributes parameter from `Attributes` to `AdditionalAttributes`.
+  This affects only consumers who set the capture-unmatched-values parameter explicitly by name.
+
 ## 8.0.0
 
 ### Breaking Changes
@@ -61,15 +68,19 @@
 
 Update renamed `Sortable` parameters:
 
+Before:
+
 ```razor
-<!-- Before -->
 <Sortable Items="items"
           Pull="SortablePullMode.Clone"
           Put="SortablePutMode.True"
           KeySelector="x => x.Id"
           DraggableSelector="x => x.CanDrag" />
+```
 
-<!-- After -->
+After:
+
+```razor
 <Sortable Items="items"
           PullMode="SortablePullMode.Clone"
           PutMode="SortablePutMode.True"
