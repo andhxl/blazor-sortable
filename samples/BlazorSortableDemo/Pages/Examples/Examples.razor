@@ -2,10 +2,11 @@
 
 @if (example is not null)
 {
-    <ExampleSection Title="@example.Title"
+    <ExampleSection @key="(example.Id, resetToken)"
+                    Title="@example.Title"
                     Code="@example.Code"
                     Reset="ResetExample">
-        <ErrorBoundary @key="(example.Id, resetToken)">
+        <ErrorBoundary>
             <DynamicComponent Type="example.Type" />
         </ErrorBoundary>
     </ExampleSection>

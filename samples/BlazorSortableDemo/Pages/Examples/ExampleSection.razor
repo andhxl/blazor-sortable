@@ -13,7 +13,7 @@
                           title="Reset example" />
         </RadzenStack>
 
-        <RadzenTabs>
+        <RadzenTabs RenderMode="TabRenderMode.Client">
             <Tabs>
                 <RadzenTabsItem Text="View">
                     @ChildContent
@@ -38,5 +38,5 @@
     public string Code { get; set; }
 
     [Parameter, EditorRequired]
-    public Action Reset { get; set; }
+    public EventCallback Reset { get; set; }
 }
