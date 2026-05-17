@@ -225,7 +225,7 @@ You can disable it with `AutoLoadStylesheet = false` if you want to provide thes
 | `PutMode` | `SortablePutMode?` | `null` | Mode for accepting items into this Sortable component |
 | `PutGroups` | `string[]?` | `null` | **Required when `PutMode="SortablePutMode.Groups"`.** Specifies the source groups from which this Sortable component can accept items |
 | `PutFunction` | `Predicate<SortableTransferContext<object>>?` | `null` | **Required when `PutMode="SortablePutMode.Function"`.** Function to determine whether an item can be accepted by this Sortable component. **Works only when the component runs on WebAssembly.** |
-| `ConvertFunction` | `SortableTryConvertFunc<TItem>?` | `null` | Converts incoming items that are not assignable to the target item type. Return `false` when conversion is not possible |
+| `ConvertFunction` | `SortableTryConvertFunc<TItem>?` | `null` | Converts incoming items that are not assignable to the target item type. Used for cross-list transfers between Sortable components with different item types. Return `false` when conversion is not possible |
 | `Sort` | `bool` | `true` | Enables or disables sorting within this Sortable component |
 | `Delay` | `int?` | `Defaults.Delay` (`150`) | Time in milliseconds to define when sorting should start |
 | `DelayOnTouchOnly` | `bool?` | `Defaults.DelayOnTouchOnly` (`true`) | Whether the delay should be applied only when the user is using touch |
@@ -295,7 +295,7 @@ The `SortableEventArgs<TItem>` class provides information about sorting operatio
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `Operation` | `SortableChangeOperation` | The operation that changed the list: `Update`, `Add`, or `Remove` |
+| `Operation` | `SortableChangeOperation` | The operation that changed the list |
 | `Item` | `TItem` | The primary item participating in the operation |
 | `Items` | `IReadOnlyList<TItem>` | Items participating in a multi-drag operation. Empty for single-item operations |
 | `From` | `SortableInfo` | Source sortable information |
@@ -306,6 +306,16 @@ The `SortableEventArgs<TItem>` class provides information about sorting operatio
 | `NewIndexes` | `IReadOnlyList<int>` | New indexes for a multi-drag operation. Empty for single-item operations |
 | `IsClone` | `bool` | Indicates whether the operation uses a cloned dragged item |
 | `IsSwap` | `bool` | Indicates whether the dragged item was swapped with another item. The target swap item is not exposed separately |
+
+### SortableChangeOperation
+
+The `SortableChangeOperation` enum defines the operation that changed a Sortable component's items.
+
+| Value | Description |
+|-------|-------------|
+| `Update` | Items were reordered within the same Sortable component |
+| `Add` | Items were accepted by a Sortable component |
+| `Remove` | Items were removed from a Sortable component |
 
 ### SortableSelectionEventArgs
 
@@ -346,6 +356,31 @@ The `SortableInfo` type provides sortable identity information.
 | `Id` | `string` | Unique identifier of the Sortable component |
 | `Group` | `string` | Group name for interaction with other Sortable components |
 
+### SortableTryConvertFunc<TItem>
+
+The `SortableTryConvertFunc<TItem>` delegate represents a method that attempts to convert an incoming item from a sortable transfer context to a strongly typed item.
+
+This delegate is used by the `ConvertFunction` parameter when items are transferred between `Sortable` components with different item types.
+
+```csharp
+public delegate bool SortableTryConvertFunc<TItem>(
+    SortableTransferContext<object> context,
+    out TItem item)
+    where TItem : notnull;
+```
+
+The method should return `true` when conversion succeeds. If conversion is not possible, it should return `false` and set `item` to its default value.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `context` | `SortableTransferContext<object>` | Transfer context that contains the incoming item and source/target sortable information |
+| `item` | `out TItem` | Converted item when conversion succeeds; otherwise the default value |
+
+| Return value | Description |
+|--------------|-------------|
+| `true` | The item was converted successfully and can be accepted by the target Sortable component |
+| `false` | The item could not be converted and should not be accepted |
+
 ## Notes
 
 - **Order of events when moving items between components:**
@@ -359,6 +394,7 @@ The `SortableInfo` type provides sortable identity information.
     If the dragged item is assignable to the target item type, it is added as-is and `ConvertFunction` is not called.  
     If the item is not assignable, `ConvertFunction` is used when provided.  
     If no `ConvertFunction` is provided, or it returns `false`, the item is not accepted and remains in its original position.
+    `ConvertFunction` receives a `SortableTransferContext<object>` because the source item type may be different from the target `TItem`.
 
 - **Moving items between lists with fallback mode:**
 
