@@ -6,8 +6,8 @@ public static class ExampleCatalog
 {
     public const string RouteTemplate = "/examples/{Id}";
 
-    public static string GetPath(string id) =>
-        RouteTemplate.Replace("{Id}", id);
+    public static string GetRelativePath(string id) =>
+        RouteTemplate.Replace("{Id}", id).TrimStart('/');
 
     public static readonly ExampleDefinition[] All =
     [

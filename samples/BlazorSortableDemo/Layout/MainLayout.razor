@@ -17,7 +17,7 @@
             @foreach (var example in ExampleCatalog.All)
             {
                 <RadzenPanelMenuItem Text="@example.Title"
-                                     Path="@ExampleCatalog.GetPath(example.Id)" />
+                                     Path="@ExampleCatalog.GetRelativePath(example.Id)" />
             }
         </RadzenPanelMenu>
     </RadzenSidebar>

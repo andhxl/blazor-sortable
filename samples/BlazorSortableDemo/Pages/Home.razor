@@ -5,6 +5,8 @@
 @code {
     protected override void OnInitialized()
     {
-        Navigation.NavigateTo(ExampleCatalog.GetPath(ExampleCatalog.All[0].Id), replace: true);
+        Navigation.NavigateTo(
+            ExampleCatalog.GetRelativePath(ExampleCatalog.All[0].Id),
+            replace: true);
     }
 }
