@@ -3,7 +3,8 @@ const sortableJsVersion = "1.15.7";
 let sortableJsLoadPromise = null;
 
 const stylesheetPath = "_content/BlazorSortable/blazor-sortable.css";
-let stylesheetInjected = false;
+const highlightStylesheetPath = "_content/BlazorSortable/blazor-sortable-highlights.css";
+const injectedStylesheets = new Set();
 
 export async function initSortable(id, options, component, assetOptions) {
     const el = document.getElementById(id);
@@ -18,7 +19,11 @@ export async function initSortable(id, options, component, assetOptions) {
     }
 
     if (assetOptions.autoLoadStylesheet) {
-        ensureStylesheet(assetOptions.version);
+        ensureStylesheet(stylesheetPath, assetOptions.version);
+
+        if (assetOptions.autoLoadHighlightStylesheet) {
+            ensureStylesheet(highlightStylesheetPath, assetOptions.version);
+        }
     }
 
     configureTransferCallbacks(options.group, component);
@@ -94,11 +99,10 @@ function buildSortableOptions(options, component) {
 
             revertDomMove(evt, isSwap);
 
-            let newIndex = evt.newIndex;
-
-            if (evt.to.children.length === 1 && newIndex === 1) {
-                newIndex = 0;
-            }
+            const newIndex =
+                evt.to.children.length === 1 && evt.newIndex === 1
+                    ? 0
+                    : evt.newIndex;
 
             component.invokeMethodAsync(
                 "OnUpdateJs",
@@ -310,24 +314,24 @@ function isSortableJsAvailable() {
     return typeof Sortable === "function";
 }
 
-function ensureStylesheet(version) {
-    if (stylesheetInjected) {
+function ensureStylesheet(path, version) {
+    if (injectedStylesheets.has(path)) {
         return;
     }
 
     const headStylesheetLinks = getHeadStylesheetLinks();
 
-    if (headStylesheetLinks.some(link => link.href.includes(stylesheetPath))) {
-        stylesheetInjected = true;
+    if (headStylesheetLinks.some(link => link.href.includes(path))) {
+        injectedStylesheets.add(path);
         return;
     }
 
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = `${stylesheetPath}?v=${version}`;
+    link.href = `${path}?v=${version}`;
 
     insertHeadStylesheetLink(headStylesheetLinks, link);
-    stylesheetInjected = true;
+    injectedStylesheets.add(path);
 }
 
 function getHeadStylesheetLinks() {

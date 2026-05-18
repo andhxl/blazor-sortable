@@ -1,5 +1,16 @@
 # Changelog
 
+## 8.1.0
+
+### Added
+
+- Added `SortableOptions.AutoLoadHighlightStylesheet` for disabling the bundled selected item and swap highlight styles while keeping the base stylesheet auto-loaded.
+- Added `_content/BlazorSortable/blazor-sortable-highlights.css` for the optional highlight styles.
+
+### Changed
+
+- Moved selected item and swap highlight styles out of `_content/BlazorSortable/blazor-sortable.css`.
+
 ## 8.0.4
 
 ### Fixes

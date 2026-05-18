@@ -5,7 +5,7 @@
 [![NuGet Version](https://img.shields.io/nuget/vpre/BlazorSortable?style=for-the-badge)](https://www.nuget.org/packages/BlazorSortable)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/BlazorSortable?style=for-the-badge)](https://www.nuget.org/packages/BlazorSortable)
 
-A Blazor component that wraps [SortableJS](https://github.com/SortableJS/Sortable), a library for drag-and-drop sorting.
+A Blazor component that wraps [SortableJS](https://github.com/SortableJS/Sortable), a JavaScript library for reorderable drag-and-drop lists.
 
 Inspired by [BlazorSortable](https://github.com/the-urlist/BlazorSortable) and represents an improved and extended implementation.
 
@@ -48,7 +48,7 @@ Add to your .csproj file:
     @using BlazorSortable
     ```
 
-By default, BlazorSortable loads the bundled SortableJS 1.15.7 script and the base stylesheet automatically when the first `Sortable` component is initialized.
+By default, BlazorSortable loads the bundled SortableJS 1.15.7 script, the base stylesheet, and the highlight stylesheet automatically when the first `Sortable` component is initialized.
 
 ### SortableOptions
 
@@ -66,6 +66,7 @@ builder.Services.AddSortable(options =>
 |--------|------|---------|-------------|
 | `AutoLoadSortableJs` | `bool` | `true` | Loads the bundled SortableJS script automatically |
 | `AutoLoadStylesheet` | `bool` | `true` | Loads the bundled BlazorSortable stylesheet automatically |
+| `AutoLoadHighlightStylesheet` | `bool` | `true` | Loads the bundled BlazorSortable highlight stylesheet automatically when `AutoLoadStylesheet` is enabled |
 | `Defaults` | `SortableDefaults` | `new()` | Default SortableJS behavior used when a component parameter is not set |
 
 You can also pass a preconfigured `SortableOptions` instance:
@@ -112,9 +113,18 @@ builder.Services.AddSortable(options =>
 
 When `AutoLoadSortableJs` is disabled, SortableJS must be available globally as `Sortable` before any `Sortable` component initializes.
 
+If you want to keep the base helper styles but provide your own selected item and swap highlight styles, disable only the highlight stylesheet:
+
+```csharp
+builder.Services.AddSortable(options =>
+{
+    options.AutoLoadHighlightStylesheet = false;
+});
+```
+
 ### Bundled Styles
 
-The bundled stylesheet contains only the default helper styles used by BlazorSortable:
+The bundled base stylesheet `_content/BlazorSortable/blazor-sortable.css` contains only the default helper styles used by BlazorSortable:
 
 ```css
 .sortable-ghost {
@@ -124,7 +134,11 @@ The bundled stylesheet contains only the default helper styles used by BlazorSor
 .sortable-fallback {
     opacity: 1 !important;
 }
+```
 
+The bundled highlight stylesheet `_content/BlazorSortable/blazor-sortable-highlights.css` contains the default visual styles for multi-drag selection and swap highlighting:
+
+```css
 .sortable-selected {
     outline: var(--blazor-sortable-selected-outline-width, 2px) solid var(--blazor-sortable-selected-outline-color, Highlight);
     outline-offset: calc(-1 * var(--blazor-sortable-selected-outline-width, 2px));
@@ -136,7 +150,7 @@ The bundled stylesheet contains only the default helper styles used by BlazorSor
 }
 ```
 
-You can disable it with `AutoLoadStylesheet = false` if you want to provide these styles yourself.
+You can disable all automatic stylesheet loading with `AutoLoadStylesheet = false` if you want to provide these styles yourself.
 
 ## Usage Example
 
