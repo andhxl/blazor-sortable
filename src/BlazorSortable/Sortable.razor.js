@@ -24,13 +24,12 @@ export async function initSortable(id, options, component, assetOptions) {
     configureTransferCallbacks(options.group, component);
 
     const sortable = new Sortable(el, buildSortableOptions(options, component));
-    el.blazorSortable = sortable;
     el.blazorSortableCleanup = configureTouchAwareMultiDragKey(el, sortable, options);
 }
 
 export function destroySortable(id) {
     const el = document.getElementById(id);
-    const sortable = el?.blazorSortable;
+    const sortable = el ? Sortable.get(el) : null;
 
     if (!sortable) {
         return;
@@ -40,7 +39,6 @@ export function destroySortable(id) {
     delete el.blazorSortableCleanup;
 
     sortable.destroy();
-    delete el.blazorSortable;
 }
 
 function configureTransferCallbacks(group, component) {
