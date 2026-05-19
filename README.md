@@ -9,6 +9,8 @@ A Blazor component that wraps [SortableJS](https://github.com/SortableJS/Sortabl
 
 Inspired by [BlazorSortable](https://github.com/the-urlist/BlazorSortable) and represents an improved and extended implementation.
 
+[Demo](https://andhxl.github.io/blazor-sortable/)
+
 ## Installation
 
 ### Via NuGet Package Manager
